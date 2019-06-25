@@ -4,9 +4,6 @@
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-plus" @click="handleCreate">
         Add
       </el-button>
-      <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
-        Export
-      </el-button>
     </div>
     <el-table :key="tableKey" v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%">
       <el-table-column align="center" label="ID">
@@ -21,7 +18,7 @@
       </el-table-column>
       <el-table-column align="center" label="AttributeType">
         <template slot-scope="scope">
-          <span>{{ scope.row.attr_type }}</span>
+          <span>{{ scope.row.attr_type === 1 ? 'input' : (scope.row.attr_type === 2 ? 'textarea' : 'select') }}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="AttributeValue">
@@ -31,7 +28,7 @@
       </el-table-column>
       <el-table-column align="center" label="CreatedAt">
         <template slot-scope="scope">
-          <span>{{ scope.row.created_at }}</span>
+          <span>{{ scope.row.created_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="Actions">
@@ -46,15 +43,21 @@
       </el-table-column>
     </el-table>
 
-    <!-- <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" /> -->
-
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
         <el-form-item label="Title" prop="title">
           <el-input v-model="temp.title" />
         </el-form-item>
-        <el-form-item label="Description" prop="description">
-          <el-input v-model="temp.description" type="textarea" />
+
+        <el-form-item label="AttrType" prop="attr_type">
+          <el-radio-group v-model="temp.attr_type">
+            <el-radio :label="1">input</el-radio>
+            <el-radio :label="2">textarea</el-radio>
+            <el-radio :label="3">select</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="AttrValue" prop="attr_value">
+          <el-input v-model="temp.attr_value" type="textarea" :disabled="temp.attr_type !== 3" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -70,28 +73,23 @@
 </template>
 
 <script>
-import { deleteProductType, createProductType, updateProductType, getProductTypeAttribute } from '@/api/product'
+import { deleteProductTypeAttribute, createProductTypeAttribute, updateProductTypeAttribute, getProductTypeAttribute } from '@/api/product'
 import waves from '@/directive/waves'
-// import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
 export default {
-  name: 'ProductType',
-  // components: { Pagination },
+  name: 'ProductTypeAttribute',
   directives: { waves },
   data() {
     return {
       tableKey: 0,
       list: null,
-      total: 0,
       listLoading: true,
-      listQuery: {
-        page: 1,
-        per_page: 20
-      },
       temp: {
         id: undefined,
+        product_type_id: undefined,
         title: '',
-        description: '',
+        attr_type: 1,
+        attr_value: '',
         status: 1
       },
       dialogFormVisible: false,
@@ -101,9 +99,8 @@ export default {
         create: 'Create'
       },
       dialogPvVisible: false,
-      downloadLoading: false,
       rules: {
-        title: [{ required: true, message: 'name is required', trigger: 'blur' }]
+        title: [{ required: true, message: 'title is required', trigger: 'blur' }]
       }
     }
   },
@@ -116,8 +113,8 @@ export default {
     getList(id) {
       this.listLoading = true
       getProductTypeAttribute(id).then(response => {
+        this.temp.product_type_id = response.productType._id
         this.list = response.productTypeAttribute
-
         // set tagsview title
         this.setTagsViewTitle()
 
@@ -143,7 +140,7 @@ export default {
         cancelButtonText: 'Cancel',
         type: 'warning'
       }).then(() => {
-        deleteProductType(row._id).then(response => {
+        deleteProductTypeAttribute(row._id).then(response => {
           this.$notify({
             title: 'Success',
             message: 'Delete Successfully',
@@ -165,8 +162,10 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
+        product_type_id: this.$route.params.id,
         title: '',
-        description: '',
+        attr_type: 1,
+        attr_value: '',
         status: 1
       }
     },
@@ -181,7 +180,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          createProductType(this.temp).then((response) => {
+          createProductTypeAttribute(this.temp).then((response) => {
             this.list.unshift(response)
             this.dialogFormVisible = false
             this.$notify({
@@ -206,7 +205,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateProductType(tempData, tempData._id).then(() => {
+          updateProductTypeAttribute(tempData, tempData._id).then(() => {
             for (const v of this.list) {
               if (v._id === this.temp._id) {
                 const index = this.list.indexOf(v)
@@ -223,20 +222,6 @@ export default {
             })
           })
         }
-      })
-    },
-    handleDownload() {
-      this.downloadLoading = true
-      import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['_id', 'title', 'description', 'status', 'created_at']
-        const filterVal = ['_id', 'name', 'value', 'status', 'created_at']
-        const data = this.formatJson(filterVal, this.list)
-        excel.export_json_to_excel({
-          header: tHeader,
-          data,
-          filename: 'table-list'
-        })
-        this.downloadLoading = false
       })
     }
   }

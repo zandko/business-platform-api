@@ -64,7 +64,7 @@ import { getProductCategory, createProductCategory, fetchProductCategory, update
 
 const defaultForm = {
   _id: undefined,
-  parent_id: undefined,
+  parent_id: 0,
   icon: '',
   title: '',
   sub_title: '',

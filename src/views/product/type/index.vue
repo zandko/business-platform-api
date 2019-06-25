@@ -4,9 +4,6 @@
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-plus" @click="handleCreate">
         Add
       </el-button>
-      <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
-        Export
-      </el-button>
     </div>
     <el-table :key="tableKey" v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%">
       <el-table-column align="center" label="ID">
@@ -26,7 +23,7 @@
       </el-table-column>
       <el-table-column align="center" label="CreatedAt">
         <template slot-scope="scope">
-          <span>{{ scope.row.created_at }}</span>
+          <span>{{ scope.row.created_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="TypeAttribute">
@@ -103,7 +100,6 @@ export default {
         create: 'Create'
       },
       dialogPvVisible: false,
-      downloadLoading: false,
       rules: {
         title: [{ required: true, message: 'name is required', trigger: 'blur' }]
       }
@@ -207,20 +203,6 @@ export default {
             })
           })
         }
-      })
-    },
-    handleDownload() {
-      this.downloadLoading = true
-      import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['_id', 'title', 'description', 'status', 'created_at']
-        const filterVal = ['_id', 'name', 'value', 'status', 'created_at']
-        const data = this.formatJson(filterVal, this.list)
-        excel.export_json_to_excel({
-          header: tHeader,
-          data,
-          filename: 'table-list'
-        })
-        this.downloadLoading = false
       })
     }
   }
