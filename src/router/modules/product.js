@@ -58,6 +58,34 @@ const productRouter = {
       component: () => import('@/views/product/color/index'),
       name: 'ProductColor',
       meta: { title: '产品颜色' }
+    },
+    {
+      path: 'product',
+      component: () => import('@/views/product/product/index'),
+      name: 'ProductProduct',
+      redirect: '/product/product/list',
+      meta: { title: '产品管理' },
+      children: [
+        {
+          path: 'list',
+          component: () => import('@/views/product/product/list/index'),
+          name: 'ProdyctProductList',
+          meta: { title: '产品列表' }
+        },
+        {
+          path: 'create',
+          component: () => import('@/views/product/product/create/index'),
+          name: 'ProdyctProductCreate',
+          meta: { title: '添加产品' }
+        },
+        {
+          path: 'edit/:id',
+          component: () => import('@/views/product/product/edit/index'),
+          name: 'ProdyctProductEdit',
+          meta: { title: '修改产品' },
+          hidden: true
+        }
+      ]
     }
   ]
 }

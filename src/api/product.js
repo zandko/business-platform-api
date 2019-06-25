@@ -137,3 +137,12 @@ export function updateProductColor(data, id) {
     data
   })
 }
+
+// 产品管理
+export function createProduct(data) {
+  return request({
+    url: 'v1/admin/product',
+    method: 'post',
+    data
+  })
+}
