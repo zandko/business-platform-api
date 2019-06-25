@@ -19,21 +19,19 @@
           <span>{{ scope.row.title }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Description">
+      <el-table-column align="center" label="AttributeType">
         <template slot-scope="scope">
-          <span>{{ scope.row.description }}</span>
+          <span>{{ scope.row.attr_type }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="AttributeValue">
+        <template slot-scope="scope">
+          <span>{{ scope.row.attr_value }}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="CreatedAt">
         <template slot-scope="scope">
           <span>{{ scope.row.created_at }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="TypeAttribute">
-        <template slot-scope="scope">
-          <router-link :to="'/product/type/attribute/'+scope.row._id" style="color: #409eff">
-            ViewAttribute
-          </router-link>
         </template>
       </el-table-column>
       <el-table-column align="center" label="Actions">
@@ -72,7 +70,7 @@
 </template>
 
 <script>
-import { getProductType, deleteProductType, createProductType, updateProductType } from '@/api/product'
+import { deleteProductType, createProductType, updateProductType, getProductTypeAttribute } from '@/api/product'
 import waves from '@/directive/waves'
 // import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
@@ -110,16 +108,34 @@ export default {
     }
   },
   created() {
-    this.getList()
+    const id = this.$route.params && this.$route.params.id
+    this.getList(id)
+    this.tempRoute = Object.assign({}, this.$route)
   },
   methods: {
-    getList() {
+    getList(id) {
       this.listLoading = true
-      getProductType(this.listQuery).then(response => {
-        this.list = response
-        // this.total = response.data.total
+      getProductTypeAttribute(id).then(response => {
+        this.list = response.productTypeAttribute
+
+        // set tagsview title
+        this.setTagsViewTitle()
+
+        // set page title
+        this.setPageTitle()
         this.listLoading = false
+      }).catch(err => {
+        console.log(err)
       })
+    },
+    setTagsViewTitle() {
+      const title = '产品类型属性'
+      const route = Object.assign({}, this.tempRoute, { title: `${title}-${this.$route.params.id}` })
+      this.$store.dispatch('tagsView/updateVisitedView', route)
+    },
+    setPageTitle() {
+      const title = '产品类型属性'
+      document.title = `${title} - ${this.$route.params.id}`
     },
     handleDelete(row) {
       this.$confirm('This will permanently delete the file. Do you want to continue?', 'prompt', {
