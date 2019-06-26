@@ -6,108 +6,154 @@
           Publish
         </el-button>
       </sticky>
-      <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
-        <el-tab-pane label="基本信息" name="basic" />
-        <el-tab-pane label="产品类型" name="type" />
-        <el-tab-pane label="产品相册" name="album" />
-        <el-tab-pane label="其他" name="other" />
-      </el-tabs>
-      <div v-if="activeName === 'basic'" class="createPost-main-container">
-        <el-row>
-          <el-col :span="24">
-            <el-form-item style="margin-bottom: 40px;" prop="title">
-              <MDinput v-model="postForm.title" name="title">
-                Title
-              </MDinput>
+      <div class="createPost-main-container">
+        <el-tabs v-model="activeName" tab-position="right" style="" @tab-click="handleClick">
+          <el-tab-pane label="基本信息" name="basic">
+            <el-row>
+              <el-col :span="24">
+                <el-form-item style="margin-bottom: 40px;" prop="title">
+                  <MDinput v-model="postForm.title" name="title">
+                    产品标题
+                  </MDinput>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :span="24">
+              <div class="postInfo-container">
+                <el-row>
+                  <el-col :span="8">
+                    <el-form-item label-width="100px" label="所属分类:" class="postInfo-container-item" prop="product_category_id">
+                      <el-select v-model="postForm.product_category_id">
+                        <el-option v-for="item in CategoryListOptions" :key="item._id" :label="item.title" :value="item._id" />
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+              </div>
+            </el-row>
+            <el-form-item prop="image" style="margin-bottom: 30px;">
+              <Upload v-model="postForm.image" />
             </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :span="24">
-          <div class="postInfo-container">
-            <el-row>
-              <el-col :span="8">
-                <el-form-item label-width="90px" label="所属分类:" class="postInfo-container-item" prop="product_category_id">
-                  <el-select v-model="postForm.product_category_id">
-                    <el-option v-for="item in CategoryListOptions" :key="item._id" :label="item.title" :value="item._id" />
-                  </el-select>
+            <el-form-item style="margin-bottom: 40px;" label-width="100px" label="附属标题:">
+              <el-input v-model="postForm.subsidiary_title" :rows="1" type="textarea" class="article-textarea" autosize />
+            </el-form-item>
+            <el-form-item style="margin-bottom: 40px;" label-width="100px" label="产品版本:">
+              <el-input v-model="postForm.version" :rows="1" type="textarea" class="article-textarea" autosize />
+            </el-form-item>
+            <el-row :span="24">
+              <el-col :span="6">
+                <el-form-item label-width="100px" label="上架时间:" class="postInfo-container-item">
+                  <el-date-picker v-model="postForm.onsale_at" type="datetime" format="yyyy-MM-dd HH:mm:ss" placeholder="选择日期和时间" />
                 </el-form-item>
               </el-col>
             </el-row>
-            <el-row>
+            <el-row :span="24">
               <el-col :span="6">
-                <el-form-item label-width="60px" label="SN:" class="postInfo-container-item">
-                  <el-input v-model.number="postForm.sn" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label-width="60px" label="价格:" class="postInfo-container-item" prop="price">
-                  <el-input v-model="postForm.price" :rows="1" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label-width="80px" label="市场价格:" class="postInfo-container-item">
-                  <el-input v-model="postForm.market_price" :rows="1" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item label-width="80px" label="库存:" class="postInfo-container-item" prop="stock">
-                  <el-input-number v-model.number="postForm.stock" :min="1" label="描述文字" />
+                <el-form-item label-width="100px" label="产品序号:">
+                  <el-input v-model="postForm.sn" oninput="value=value.replace(/[^\d]/g,'')" />
                 </el-form-item>
               </el-col>
             </el-row>
-          </div>
-        </el-row>
-        <el-form-item prop="image" style="margin-bottom: 30px;">
-          <Upload v-model="postForm.image" />
-        </el-form-item>
-        <el-form-item style="margin-bottom: 40px;" label-width="80px" label="版本:">
-          <el-input v-model="postForm.version" :rows="1" type="textarea" class="article-textarea" autosize />
-        </el-form-item>
-        <el-form-item style="margin-bottom: 40px;" label-width="80px" label="长标题:">
-          <el-input v-model="postForm.subsidiary_title" :rows="1" type="textarea" class="article-textarea" autosize />
-        </el-form-item>
-        <el-form-item style="margin-bottom: 40px;" label-width="80px" label="关键字:">
-          <el-input v-model="postForm.keywords" :rows="1" type="textarea" class="article-textarea" autosize />
-        </el-form-item>
-        <el-form-item style="margin-bottom: 40px;" label-width="80px" label="描述:">
-          <el-input v-model="postForm.description" :rows="1" type="textarea" class="article-textarea" autosize />
-        </el-form-item>
-        <el-form-item prop="content" style="margin-bottom: 30px;">
-          <Tinymce ref="editor" v-model="postForm.content" :height="400" />
-        </el-form-item>
-      </div>
-      <div v-if="activeName === 'type'" class="createPost-main-container">
-        <el-form-item label-width="90px" label="所属类型:" class="postInfo-container-item" prop="product_type_id">
-          <el-select v-model="postForm.product_type_id" @change="handleProductTypeChange">
-            <el-option v-for="item in TypeListOptions" :key="item._id" :label="item.title" :value="item._id" />
-          </el-select>
-        </el-form-item>
-        <el-form-item v-for="item in TypeAttributeList" :key="item._id" style="margin-bottom: 40px;" label-width="100px" :label="item.title + ':'">
-          <el-input v-if="item.attr_type === 1" v-model="postForm.version" />
-          <el-input v-else-if="item.attr_type === 2" v-model="postForm.version" :rows="1" type="textarea" class="article-textarea" autosize />
-          <el-select v-if="item.attr_type === 3" v-model="postForm.version" placeholder="请选择">
-            <el-option v-for="item1 in item.attr_value.split('\n')" :key="item1" :label="item1" :value="item1" />
-          </el-select>
-        </el-form-item>
-      </div>
-      <div v-if="activeName === 'other'" class="createPost-main-container">
-        <el-form-item label-width="90px" label="选择颜色:" class="postInfo-container-item">
-          <el-checkbox-group v-model="postForm.color">
-            <el-checkbox v-for="item in ColorListOptions" :key="item.value" :label="item.name" :value="item.value" :style="{color: item.value}" />
-          </el-checkbox-group>
-        </el-form-item>
-        <el-form-item style="margin-bottom: 40px;" label-width="80px" label="更多属性:">
-          <el-input v-model="postForm.attrs" :rows="1" type="textarea" class="article-textarea" autosize />
-        </el-form-item>
-        <el-form-item style="margin-bottom: 40px;" label-width="80px" label="赠品:">
-          <el-input v-model="postForm.gift" :rows="1" type="textarea" class="article-textarea" autosize />
-        </el-form-item>
-        <el-form-item style="margin-bottom: 40px;" label-width="80px" label="配件:">
-          <el-input v-model="postForm.fitting" :rows="1" type="textarea" class="article-textarea" autosize />
-        </el-form-item>
-        <el-form-item style="margin-bottom: 40px;" label-width="80px" label="关联产品:">
-          <el-input v-model="postForm.relation" :rows="1" type="textarea" class="article-textarea" autosize />
-        </el-form-item>
+            <el-row :span="24">
+              <el-col :span="6">
+                <el-form-item label-width="100px" label="产品价格:" prop="price">
+                  <el-input v-model="postForm.price" oninput="value=value.replace(/[^0-9.]/g,'')" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :span="24">
+              <el-col :span="6">
+                <el-form-item label-width="100px" label="产品原价:">
+                  <el-input v-model="postForm.market_price" oninput="value=value.replace(/[^0-9.]/g,'')" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :span="24">
+              <el-col :span="6">
+                <el-form-item label-width="100px" label="产品库存:" prop="stock">
+                  <el-input-number v-model="postForm.stock" :min="1" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :span="24">
+              <el-col :span="6">
+                <el-form-item label-width="100px" label="产品排序:" prop="stock">
+                  <el-input-number v-model="postForm.sort" :min="1" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-form-item style="margin-bottom: 40px;" label-width="100px" label="产品状态:">
+              <el-radio v-model="postForm.status" label="1">显示</el-radio>
+              <el-radio v-model="postForm.status" label="0">隐藏</el-radio>
+            </el-form-item>
+            <el-form-item label-width="100px" label="加入推荐:">
+              <el-checkbox-group v-model="recommendList" @change="handleRecommendChange">
+                <el-checkbox label="is_best">精品</el-checkbox>
+                <el-checkbox label="is_rec">推荐</el-checkbox>
+                <el-checkbox label="is_new">新品</el-checkbox>
+              </el-checkbox-group>
+            </el-form-item>
+          </el-tab-pane>
+          <el-tab-pane label="详细描述" name="detailed">
+            <el-form-item prop="content" style="margin-bottom: 30px;">
+              <Tinymce ref="editor" v-model="postForm.content" :height="400" />
+            </el-form-item>
+          </el-tab-pane>
+          <el-tab-pane label="规格包装" name="packing">
+            <el-form-item label-width="100px" label="所属类型:" prop="product_type_id">
+              <el-select v-model="postForm.product_type_id" @change="handleProductTypeChange">
+                <el-option v-for="item in TypeListOptions" :key="item._id" :label="item.title" :value="item._id" />
+              </el-select>
+            </el-form-item>
+            <el-form-item v-for="item in TypeAttributeList" :key="item._id" style="margin-bottom: 40px;" label-width="100px" :label="item.title + ':'">
+              <el-input v-if="item.attr_type === 1" v-model="postForm.attr_value[item._id]" />
+              <el-input v-else-if="item.attr_type === 2" v-model="postForm.attr_value[item._id]" :rows="1" type="textarea" class="article-textarea" autosize />
+              <el-select v-if="item.attr_type === 3" v-model="postForm.attr_value[item._id]" placeholder="请选择">
+                <el-option v-for="item1 in item.attr_value.split('\n')" :key="item1" :label="item1" :value="item1" />
+              </el-select>
+            </el-form-item>
+          </el-tab-pane>
+          <el-tab-pane label="其他信息" name="other">
+            <el-form-item label-width="100px" label="选择颜色:" class="postInfo-container-item">
+              <el-checkbox-group v-model="colorList" @change="handleColorChange">
+                <el-checkbox v-for="item in ColorListCheckbox" :key="item.value" :label="item._id" :style="{color: item.value}">{{ item.name }}</el-checkbox>
+              </el-checkbox-group>
+            </el-form-item>
+            <el-form-item style="margin-bottom: 40px;" label-width="100px" label="更多属性:">
+              <el-input v-model="postForm.attrs" :rows="1" type="textarea" class="article-textarea" placeholder="属性名：属性值 格式：内存：8G,16G,32G | 尺寸：33,34,35" autosize />
+            </el-form-item>
+            <el-form-item style="margin-bottom: 40px;" label-width="100px" label="产品赠品:">
+              <el-input v-model="postForm.gift" :rows="1" type="textarea" class="article-textarea" placeholder="产品ID-产品数量 格式：23-2,24-3" autosize />
+            </el-form-item>
+            <el-form-item style="margin-bottom: 40px;" label-width="100px" label="产品配件:">
+              <el-input v-model="postForm.fitting" :rows="1" type="textarea" class="article-textarea" placeholder="产品ID-产品数量 格式：23-2,24-3" autosize />
+            </el-form-item>
+            <el-form-item style="margin-bottom: 40px;" label-width="100px" label="关联产品:">
+              <el-input v-model="postForm.relation" :rows="1" type="textarea" class="article-textarea" placeholder="填写关联商品的ID 格式：23,24,25" autosize />
+            </el-form-item>
+            <el-form-item style="margin-bottom: 40px;" label-width="100px" label="产品关键字:">
+              <el-input v-model="postForm.keywords" :rows="1" type="textarea" class="article-textarea" autosize />
+            </el-form-item>
+            <el-form-item style="margin-bottom: 40px;" label-width="100px" label="产品描述:">
+              <el-input v-model="postForm.description" :rows="1" type="textarea" class="article-textarea" autosize />
+            </el-form-item>
+          </el-tab-pane>
+          <el-tab-pane label="产品相册" name="album">
+            <el-upload
+              action="http://127.0.0.1:7001/api/v1/common/upload"
+              list-type="picture-card"
+              :headers="headers"
+              :on-preview="handlePictureCardPreview"
+              :on-success="handleSuccess"
+              :on-remove="handleRemove"
+            >
+              <i class="el-icon-plus" />
+            </el-upload>
+            <el-dialog :visible.sync="dialogVisible">
+              <img width="100%" :src="dialogImageUrl" alt="">
+            </el-dialog>
+          </el-tab-pane>
+        </el-tabs>
       </div>
     </el-form>
   </div>
@@ -116,10 +162,11 @@
 <script>
 import Tinymce from '@/components/Tinymce'
 import Upload from '@/components/Upload/SingleImage3'
+import { getToken } from '@/utils/auth'
 import MDinput from '@/components/MDinput'
 import Sticky from '@/components/Sticky' // 粘性header组件
 import { fetchArticle } from '@/api/article'
-import { getProductCategory, getProductType, getProductTypeAttribute, getProductColor } from '@/api/product'
+import { getProductCategory, getProductType, getProductTypeAttribute, getProductColor, createProduct } from '@/api/product'
 
 const defaultForm = {
   _id: undefined,
@@ -129,19 +176,21 @@ const defaultForm = {
   product_category_id: undefined,
   product_type_id: undefined,
   image: '',
-  stock: undefined,
-  price: undefined,
-  market_price: undefined,
+  stock: 0,
+  price: 0,
+  market_price: 0,
   attrs: '',
   gift: '',
   fitting: '',
   version: '',
-  color: [],
+  color: '',
+  attr_value: [],
+  image_url: [],
   keywords: '',
   description: '',
   content: '',
-  sort: undefined,
-  is_onsale: 1,
+  sort: 1,
+  status: '1',
   is_best: 0,
   is_new: 0,
   is_rec: 0,
@@ -162,17 +211,21 @@ export default {
       activeName: 'basic',
       postForm: Object.assign({}, defaultForm),
       loading: false,
+      colorList: [],
+      recommendList: [],
+      TypeAttributeList: [],
       CategoryListOptions: [],
       TypeListOptions: [],
-      TypeAttributeList: [],
-      ColorListOptions: [],
+      ColorListCheckbox: [],
+      dialogImageUrl: '',
+      dialogVisible: false,
       rules: {
-        title: [{ required: true, message: '标题为必传项', trigger: 'blur' }],
+        title: [{ required: true, message: '产品标题为必传项', trigger: 'blur' }],
         product_category_id: [{ required: true, message: '所属分类为必传项', trigger: 'change' }],
-        stock: [{ required: true, message: '库存为必传项', trigger: 'blur' }],
-        price: [{ required: true, message: '价格为必传项', trigger: 'blur' }],
-        image: [{ required: true, message: '封面图为必传项', trigger: 'change' }],
-        onsale_at: [{ required: true, message: '上架时间为必传项', trigger: 'change' }]
+        stock: [{ required: true, message: '产品库存为必传项', trigger: 'blur' }],
+        price: [{ required: true, message: '产品价格为必传项', trigger: 'blur' }],
+        image: [{ required: true, message: '产品封面图为必传项', trigger: 'change' }],
+        onsale_at: [{ required: true, message: '产品上架时间为必传项', trigger: 'change' }]
       },
       tempRoute: {}
     }
@@ -184,6 +237,11 @@ export default {
       },
       set(val) {
         this.postForm.onsale_at = new Date(val)
+      }
+    },
+    headers() {
+      return {
+        'Authorization': getToken()
       }
     }
   },
@@ -200,19 +258,49 @@ export default {
     this.tempRoute = Object.assign({}, this.$route)
   },
   methods: {
+    handleSuccess(response, file, fileList) {
+      const imageList = []
+      fileList.forEach(element => {
+        if (element.status === 'success') {
+          imageList.push(element.response.url)
+        }
+      })
+      this.postForm.image_url = [...new Set(imageList)]
+    },
+    handleRemove(file, fileList) {
+      const imageList = []
+      fileList.forEach(element => {
+        if (element.status === 'success') {
+          imageList.push(element.url)
+        }
+      })
+      this.postForm.image_url = [...new Set(imageList)]
+    },
+    handlePictureCardPreview(file) {
+      console.log(file.url)
+      this.dialogImageUrl = file.url
+      this.dialogVisible = true
+    },
     handleProductTypeChange(val) {
       this.getRemoteTypeAttribute(val)
     },
+    handleRecommendChange(val) {
+      const recommendList = [...new Set(val)]
+      recommendList.includes('is_best') ? this.postForm.is_best = 1 : this.postForm.is_best = 0
+      recommendList.includes('is_new') ? this.postForm.is_new = 1 : this.postForm.is_new = 0
+      recommendList.includes('is_rec') ? this.postForm.is_rec = 1 : this.postForm.is_rec = 0
+    },
+    handleColorChange(val) {
+      const colorList = [...new Set(val)]
+      this.postForm.color = colorList.join(',')
+      console.log(this.postForm.color)
+    },
     handleClick(tab, event) {
-      console.log(tab, event)
+      // console.log(tab, event)
     },
     fetchData(id) {
       fetchArticle(id).then(response => {
         this.postForm = response.data
-
-        // just for test
-        this.postForm.title += `   Article Id:${this.postForm.id}`
-        this.postForm.content_short += `   Article Id:${this.postForm.id}`
 
         // set tagsview title
         this.setTagsViewTitle()
@@ -233,37 +321,25 @@ export default {
       document.title = `${title} - ${this.postForm.id}`
     },
     submitForm() {
+      this.postForm.onsale_at = new Date(this.postForm.onsale_at).getTime()
+      console.log(this.postForm)
       this.$refs.postForm.validate(valid => {
         if (valid) {
           this.loading = true
-          this.$notify({
-            title: '成功',
-            message: '发布文章成功',
-            type: 'success',
-            duration: 2000
+          createProduct(this.postForm).then(response => {
+            this.$notify({
+              title: '成功',
+              message: '添加成功',
+              type: 'success',
+              duration: 2000
+            })
+            this.loading = false
           })
-          this.loading = false
         } else {
           console.log('error submit!!')
           return false
         }
       })
-    },
-    draftForm() {
-      if (this.postForm.content.length === 0 || this.postForm.title.length === 0) {
-        this.$message({
-          message: '请填写必要的标题和内容',
-          type: 'warning'
-        })
-        return
-      }
-      this.$message({
-        message: '保存成功',
-        type: 'success',
-        showClose: true,
-        duration: 1000
-      })
-      this.postForm.status = 'draft'
     },
     getRemoteCategoryList() {
       getProductCategory().then(response => {
@@ -273,7 +349,6 @@ export default {
     },
     getRemoteTypeList() {
       getProductType().then(response => {
-        console.log(response)
         if (!response) return
         this.TypeListOptions = response.map(v => v)
       })
@@ -285,7 +360,7 @@ export default {
     },
     getRemoteColorList() {
       getProductColor().then(response => {
-        this.ColorListOptions = response
+        this.ColorListCheckbox = response
       })
     }
   }

@@ -4,10 +4,11 @@
       :data="dataObj"
       :multiple="false"
       :show-file-list="false"
+      :headers="headers"
       :on-success="handleImageSuccess"
       class="image-uploader"
       drag
-      action="https://httpbin.org/post"
+      action="http://127.0.0.1:7001/api/v1/common/upload"
     >
       <i class="el-icon-upload" />
       <div class="el-upload__text">
@@ -34,7 +35,8 @@
 </template>
 
 <script>
-import { getToken } from '@/api/qiniu'
+// import { getToken } from '@/api/qiniu'
+import { getToken } from '@/utils/auth'
 
 export default {
   name: 'SingleImageUpload3',
@@ -53,6 +55,11 @@ export default {
   computed: {
     imageUrl() {
       return this.value
+    },
+    headers() {
+      return {
+        'Authorization': getToken()
+      }
     }
   },
   methods: {
@@ -63,7 +70,7 @@ export default {
       this.$emit('input', val)
     },
     handleImageSuccess(file) {
-      this.emitInput(file.files.file)
+      this.emitInput(file.url)
     },
     beforeUpload() {
       const _self = this
