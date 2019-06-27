@@ -105,12 +105,21 @@
                 <el-option v-for="item in TypeListOptions" :key="item._id" :label="item.title" :value="item._id" />
               </el-select>
             </el-form-item>
-            <el-form-item v-for="item in TypeAttributeList" :key="item._id" style="margin-bottom: 40px;" label-width="100px" :label="item.title + ':'">
-              <el-input v-if="item.attr_type === 1" v-model="postForm.attr_value[item._id]" />
-              <el-input v-else-if="item.attr_type === 2" v-model="postForm.attr_value[item._id]" :rows="1" type="textarea" class="article-textarea" autosize />
-              <el-select v-if="item.attr_type === 3" v-model="postForm.attr_value[item._id]" placeholder="请选择">
-                <el-option v-for="item1 in item.attr_value.split('\n')" :key="item1" :label="item1" :value="item1" />
-              </el-select>
+            <el-form-item v-for="(item, index) in TypeAttributeList" :key="item._id" style="margin-bottom: 40px;" label-width="100px" :label="item.title + ':'">
+              <span v-if="item.attr_type === 1">
+                <el-input v-model="attributeValueList[index]" />
+                <el-input type="hidden" name="attributeIdList" :value="item._id" />
+              </span>
+              <span v-else-if="item.attr_type === 2">
+                <el-input v-model="attributeValueList[index]" :rows="1" type="textarea" class="article-textarea" autosize />                
+                <el-input type="hidden" name="attributeIdList" :value="item._id" />
+              </span>
+              <span v-if="item.attr_type === 3">
+                <el-select v-model="attributeValueList[index]" placeholder="请选择">
+                  <el-option v-for="item1 in item.attr_value.split('\n')" :key="item1" :label="item1" :value="item1" />
+                </el-select>
+                <el-input type="hidden" name="attributeIdList" :value="item._id" />
+              </span>
             </el-form-item>
           </el-tab-pane>
           <el-tab-pane label="其他信息" name="other">
@@ -184,7 +193,7 @@ const defaultForm = {
   fitting: '',
   version: '',
   color: '',
-  attr_value: [],
+  attr_value: undefined,
   image_url: [],
   keywords: '',
   description: '',
@@ -212,6 +221,8 @@ export default {
       postForm: Object.assign({}, defaultForm),
       loading: false,
       colorList: [],
+      attributeIdList: [],
+      attributeValueList: [],
       recommendList: [],
       TypeAttributeList: [],
       CategoryListOptions: [],
@@ -277,7 +288,6 @@ export default {
       this.postForm.image_url = [...new Set(imageList)]
     },
     handlePictureCardPreview(file) {
-      console.log(file.url)
       this.dialogImageUrl = file.url
       this.dialogVisible = true
     },
@@ -321,8 +331,16 @@ export default {
       document.title = `${title} - ${this.postForm.id}`
     },
     submitForm() {
+      const attributeIdList = document.getElementsByName('attributeIdList')
+      const attributeList = []
+      attributeIdList.forEach((item, index) => {
+        attributeList.push({
+          _id: item.value,
+          attr_value: this.attributeValueList[index]
+        })
+      })
       this.postForm.onsale_at = new Date(this.postForm.onsale_at).getTime()
-      console.log(this.postForm)
+      this.postForm.attr_value = attributeList
       this.$refs.postForm.validate(valid => {
         if (valid) {
           this.loading = true
