@@ -54,20 +54,20 @@ const productRouter = {
     {
       path: 'list',
       component: () => import('@/views/product/product/index'),
-      name: 'ProductProduct',
+      name: 'ProductList',
       meta: { title: '产品列表' }
     },
     {
       path: 'create',
       component: () => import('@/views/product/product/create'),
-      name: 'ProdyctProductCreate',
+      name: 'ProductCreate',
       meta: { title: '添加产品' },
       hidden: true
     },
     {
       path: 'edit/:id',
       component: () => import('@/views/product/product/edit'),
-      name: 'ProdyctProductEdit',
+      name: 'ProductEdit',
       meta: { title: '修改产品' },
       hidden: true
     }

@@ -147,6 +147,13 @@ export function getProduct(options) {
   })
 }
 
+export function fetchProduct(id) {
+  return request({
+    url: `v1/admin/product/${id}`,
+    method: 'get'
+  })
+}
+
 export function createProduct(data) {
   return request({
     url: 'v1/admin/product',

@@ -7,8 +7,7 @@
         </el-button>
       </router-link>
     </div>
-    <el-table
-      :key="tableKey" v-loading="listLoading" :data="list" row-key="_id" border style="width: 100%">
+    <el-table :key="tableKey" v-loading="listLoading" :data="list" row-key="_id" border style="width: 100%">
       <el-table-column type="expand">
         <template slot-scope="props">
           <el-form label-position="left" inline class="demo-table-expand">
@@ -110,7 +109,7 @@ import waves from '@/directive/waves'
 import Pagination from '@/components/Pagination'
 
 export default {
-  name: 'ProductCategory',
+  name: 'ProductList',
   directives: { waves },
   components: { Pagination },
   data() {

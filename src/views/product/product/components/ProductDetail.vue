@@ -3,7 +3,7 @@
     <el-form ref="postForm" :model="postForm" :rules="rules" class="form-container">
       <sticky :z-index="10" :class-name="'sub-navbar draft'">
         <el-button v-loading="loading" style="margin-left: 10px;" type="success" @click="submitForm">
-          Publish
+          {{ isEdit ? '修改' : '创建' }}
         </el-button>
       </sticky>
       <div class="createPost-main-container">
@@ -107,18 +107,23 @@
             </el-form-item>
             <el-form-item v-for="(item, index) in TypeAttributeList" :key="item._id" style="margin-bottom: 40px;" label-width="100px" :label="item.title + ':'">
               <span v-if="item.attr_type === 1">
-                <el-input v-model="attributeValueList[index]" />
-                <el-input type="hidden" name="attributeIdList" :value="item._id" />
+                <el-input v-if="isEdit" v-model="attributeValueList[index].value" />
+                <el-input v-else v-model="attributeValueList[index].value" />
+                <el-input type="hidden" name="attributeIdList" :value="isEdit ? attributeValueList[index]._id : item._id" />
               </span>
               <span v-else-if="item.attr_type === 2">
-                <el-input v-model="attributeValueList[index]" :rows="1" type="textarea" class="article-textarea" autosize />
-                <el-input type="hidden" name="attributeIdList" :value="item._id" />
+                <el-input v-if="isEdit" v-model="attributeValueList[index].value" :rows="1" type="textarea" class="article-textarea" autosize />
+                <el-input v-else v-model="attributeValueList[index]" :rows="1" type="textarea" class="article-textarea" autosize />
+                <el-input type="hidden" name="attributeIdList" :value="isEdit ? attributeValueList[index]._id : item._id" />
               </span>
               <span v-if="item.attr_type === 3">
-                <el-select v-model="attributeValueList[index]" placeholder="请选择">
+                <el-select v-if="isEdit" v-model="attributeValueList[index].value" placeholder="请选择">
                   <el-option v-for="item1 in item.attr_value.split('\n')" :key="item1" :label="item1" :value="item1" />
                 </el-select>
-                <el-input type="hidden" name="attributeIdList" :value="item._id" />
+                <el-select v-else v-model="attributeValueList[index]" placeholder="请选择">
+                  <el-option v-for="item1 in item.attr_value.split('\n')" :key="item1" :label="item1" :value="item1" />
+                </el-select>
+                <el-input type="hidden" name="attributeIdList" :value="isEdit ? attributeValueList[index]._id : item._id" />
               </span>
             </el-form-item>
           </el-tab-pane>
@@ -152,6 +157,7 @@
               action="http://127.0.0.1:7001/api/v1/common/upload"
               list-type="picture-card"
               :headers="headers"
+              :file-list="fileList"
               :on-preview="handlePictureCardPreview"
               :on-success="handleSuccess"
               :on-remove="handleRemove"
@@ -174,8 +180,7 @@ import Upload from '@/components/Upload/SingleImage3'
 import { getToken } from '@/utils/auth'
 import MDinput from '@/components/MDinput'
 import Sticky from '@/components/Sticky' // 粘性header组件
-import { fetchArticle } from '@/api/article'
-import { getProductCategory, getProductType, getProductTypeAttribute, getProductColor, createProduct } from '@/api/product'
+import { fetchProduct, getProductCategory, getProductType, getProductTypeAttribute, getProductColor, createProduct } from '@/api/product'
 
 const defaultForm = {
   _id: undefined,
@@ -207,7 +212,7 @@ const defaultForm = {
 }
 
 export default {
-  name: 'ArticleDetail',
+  name: 'ProductDetail',
   components: { Tinymce, MDinput, Upload, Sticky },
   props: {
     isEdit: {
@@ -228,6 +233,7 @@ export default {
       CategoryListOptions: [],
       TypeListOptions: [],
       ColorListCheckbox: [],
+      fileList: undefined,
       dialogImageUrl: '',
       dialogVisible: false,
       rules: {
@@ -303,15 +309,22 @@ export default {
     handleColorChange(val) {
       const colorList = [...new Set(val)]
       this.postForm.color = colorList.join(',')
-      console.log(this.postForm.color)
     },
     handleClick(tab, event) {
-      // console.log(tab, event)
+      if (this.isEdit && tab.name === 'packing') {
+        this.handleProductTypeChange(this.postForm.product_type_id)
+      }
     },
     fetchData(id) {
-      fetchArticle(id).then(response => {
-        this.postForm = response.data
-
+      fetchProduct(id).then(response => {
+        this.postForm = response.productResult
+        this.postForm.status = response.productResult.status + ''
+        response.productResult.is_best ? this.recommendList.push('is_best') : ''
+        response.productResult.is_new ? this.recommendList.push('is_new') : ''
+        response.productResult.is_rec ? this.recommendList.push('is_rec') : ''
+        this.attributeValueList = response.productAttribute
+        this.colorList = response.productResult.color.split(',')
+        this.fileList = response.productImage
         // set tagsview title
         this.setTagsViewTitle()
 
@@ -352,6 +365,9 @@ export default {
               duration: 2000
             })
             this.loading = false
+            this.$router.push({
+              name: 'ProductList'
+            })
           })
         } else {
           console.log('error submit!!')
