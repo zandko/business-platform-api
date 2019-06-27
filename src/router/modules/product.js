@@ -16,7 +16,7 @@ const productRouter = {
       path: 'category',
       component: () => import('@/views/product/category/index'),
       name: 'ProdyctCategory',
-      meta: { title: '分类列表' },
+      meta: { title: '分类列表' }
     },
     {
       path: 'category/create',
@@ -55,7 +55,7 @@ const productRouter = {
       path: 'list',
       component: () => import('@/views/product/product/index'),
       name: 'ProductProduct',
-      meta: { title: '产品列表' },
+      meta: { title: '产品列表' }
     },
     {
       path: 'create',

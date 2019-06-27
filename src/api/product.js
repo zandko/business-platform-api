@@ -139,6 +139,14 @@ export function updateProductColor(data, id) {
 }
 
 // 产品管理
+export function getProduct(options) {
+  return request({
+    url: 'v1/admin/product',
+    method: 'get',
+    params: options
+  })
+}
+
 export function createProduct(data) {
   return request({
     url: 'v1/admin/product',

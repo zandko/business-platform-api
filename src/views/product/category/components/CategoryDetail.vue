@@ -4,7 +4,7 @@
 
       <sticky :z-index="10" :class-name="'sub-navbar '+status">
         <el-button v-loading="loading" style="margin-left: 10px;" type="success" @click="submitForm">
-          {{ isEdit ? '修改' : '添加' }}
+          {{ isEdit ? '修改' : '创建' }}
         </el-button>
       </sticky>
 
@@ -12,7 +12,7 @@
         <el-row>
           <el-form-item style="margin-bottom: 40px;" prop="title">
             <MDinput v-model="postForm.title" :maxlength="100" name="title" required>
-              名称
+              分类名称
             </MDinput>
           </el-form-item>
         </el-row>
@@ -26,26 +26,26 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item style="margin-bottom: 40px;" label-width="100px" label="链接:">
-          <el-input v-model="postForm.link" :rows="1" type="textarea" class="article-textarea" autosize placeholder="链接" />
+        <el-form-item style="margin-bottom: 40px;" label-width="100px" label="分类链接:">
+          <el-input v-model="postForm.link" :rows="1" type="textarea" class="article-textarea" autosize />
         </el-form-item>
-        <el-form-item style="margin-bottom: 40px;" label-width="100px" label="排序:">
-          <el-input v-model.number="postForm.sort" :rows="1" type="textarea" class="article-textarea" autosize placeholder="排序" />
+        <el-form-item style="margin-bottom: 40px;" label-width="100px" label="分类排序:">
+          <el-input v-model.number="postForm.sort" :rows="1" type="textarea" class="article-textarea" autosize />
         </el-form-item>
         <el-form-item style="margin-bottom: 40px;" label-width="100px" label="SEO 标题:">
-          <el-input v-model="postForm.sub_title" :rows="1" type="textarea" class="article-textarea" autosize placeholder="SEO 标题" />
+          <el-input v-model="postForm.sub_title" :rows="1" type="textarea" class="article-textarea" autosize />
         </el-form-item>
         <el-form-item style="margin-bottom: 40px;" label-width="100px" label="SEO 关键字:">
-          <el-input v-model="postForm.keywords" :rows="1" type="textarea" class="article-textarea" autosize placeholder="SEO 关键字" />
+          <el-input v-model="postForm.keywords" :rows="1" type="textarea" class="article-textarea" autosize />
         </el-form-item>
         <el-form-item style="margin-bottom: 40px;" label-width="100px" label="SEO 描述:">
-          <el-input v-model="postForm.description" :rows="1" type="textarea" class="article-textarea" autosize placeholder="SEO 描述" />
+          <el-input v-model="postForm.description" :rows="1" type="textarea" class="article-textarea" autosize />
         </el-form-item>
         <el-form-item style="margin-bottom: 40px;" label-width="100px" label="筛选ID:">
-          <el-input v-model="postForm.filter_attr" :rows="1" type="textarea" class="article-textarea" autosize placeholder="筛选ID" />
+          <el-input v-model="postForm.filter_attr" :rows="1" type="textarea" class="article-textarea" autosize />
         </el-form-item>
-        <el-form-item style="margin-bottom: 40px;" label-width="100px" label="模板:">
-          <el-input v-model="postForm.template" :rows="1" type="textarea" class="article-textarea" autosize placeholder="模板" />
+        <el-form-item style="margin-bottom: 40px;" label-width="100px" label="分类模板:">
+          <el-input v-model="postForm.template" :rows="1" type="textarea" class="article-textarea" autosize />
         </el-form-item>
         <el-form-item prop="icon" style="margin-bottom: 30px;">
           <Upload v-model="postForm.icon" />
@@ -87,17 +87,6 @@ export default {
     }
   },
   data() {
-    const validateRequire = (rule, value, callback) => {
-      if (value === '') {
-        this.$message({
-          message: rule.field + '为必传项',
-          type: 'error'
-        })
-        callback(new Error(rule.field + '为必传项'))
-      } else {
-        callback()
-      }
-    }
     return {
       defaultN: 0,
       status: 'draft',
@@ -105,7 +94,7 @@ export default {
       loading: false,
       CategoryListOptions: [],
       rules: {
-        title: [{ validator: validateRequire }]
+        title: [{ required: true, message: '分类名称为必传项', trigger: 'blur' }]
       },
       tempRoute: {}
     }

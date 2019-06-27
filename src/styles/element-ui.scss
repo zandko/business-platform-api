@@ -77,3 +77,20 @@
 .el-range-editor.el-input__inner {
   display: inline-flex !important;
 }
+
+.el-table__header, .el-table__body {
+  table-layout: auto !important;
+}
+
+.demo-table-expand {
+  font-size: 0;
+}
+.demo-table-expand label {
+  width: 90px;
+  color: #99a9bf;
+}
+.demo-table-expand .el-form-item {
+  margin-right: 0;
+  margin-bottom: 0;
+  width: 50%;
+}

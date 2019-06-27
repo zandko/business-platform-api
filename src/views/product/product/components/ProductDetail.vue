@@ -322,13 +322,13 @@ export default {
       })
     },
     setTagsViewTitle() {
-      const title = 'Edit Article'
-      const route = Object.assign({}, this.tempRoute, { title: `${title}-${this.postForm.id}` })
+      const title = '修改产品'
+      const route = Object.assign({}, this.tempRoute, { title: `${title}-${this.postForm._id}` })
       this.$store.dispatch('tagsView/updateVisitedView', route)
     },
     setPageTitle() {
-      const title = 'Edit Article'
-      document.title = `${title} - ${this.postForm.id}`
+      const title = '修改产品'
+      document.title = `${title} - ${this.postForm._id}`
     },
     submitForm() {
       const attributeIdList = document.getElementsByName('attributeIdList')

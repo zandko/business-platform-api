@@ -2,32 +2,32 @@
   <div class="app-container">
     <div class="filter-container">
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-plus" @click="handleCreate">
-        Add
+        创建
       </el-button>
     </div>
     <el-table :key="tableKey" v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%" :row-style="tableRowClassName">
-      <el-table-column align="center" label="ID">
+      <el-table-column align="center" label="颜色ID">
         <template slot-scope="scope">
           <span>{{ scope.row._id }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Name">
+      <el-table-column align="center" label="颜色名">
         <template slot-scope="scope">
           <span>{{ scope.row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Value">
+      <el-table-column align="center" label="颜色值">
         <template slot-scope="scope">
           <span>{{ scope.row.value }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Actions">
+      <el-table-column align="center" label="操作">
         <template slot-scope="{row}">
           <el-button type="primary" size="small" icon="el-icon-edit" @click="handleUpdate(row)">
-            Edit
+            修改
           </el-button>
           <el-button v-if="row.status!='deleted'" size="small" type="danger" icon="el-icon-delete" @click="handleDelete(row)">
-            Delete
+            删除
           </el-button>
         </template>
       </el-table-column>
@@ -37,19 +37,19 @@
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="Name" prop="name">
+        <el-form-item label="颜色名" prop="name">
           <el-input v-model="temp.name" />
         </el-form-item>
-        <el-form-item label="Value" prop="value">
+        <el-form-item label="颜色值" prop="value">
           <el-input v-model="temp.value" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">
-          Cancel
+          取消
         </el-button>
         <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">
-          Confirm
+          确认
         </el-button>
       </div>
     </el-dialog>
@@ -84,13 +84,13 @@ export default {
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
-        update: 'Edit',
-        create: 'Create'
+        update: '修改',
+        create: '创建'
       },
       dialogPvVisible: false,
       rules: {
-        name: [{ required: true, message: 'name is required', trigger: 'blur' }],
-        value: [{ required: true, message: 'value is required', trigger: 'blur' }]
+        name: [{ required: true, message: '颜色名为必传项', trigger: 'blur' }],
+        value: [{ required: true, message: '颜色值为必传项', trigger: 'blur' }]
       }
     }
   },
@@ -98,7 +98,7 @@ export default {
     this.getList()
   },
   methods: {
-    tableRowClassName({row, rowIndex}) {
+    tableRowClassName({ row, rowIndex }) {
       return 'background-color:' + row.value
     },
     getList() {

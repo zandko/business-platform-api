@@ -3,40 +3,40 @@
     <div class="filter-container">
       <router-link :to="'/product/category/create'">
         <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-plus">
-          添加
+          创建
         </el-button>
       </router-link>
     </div>
     <el-table :key="tableKey" v-loading="listLoading" :data="list" row-key="_id" border fit highlight-current-row :tree-props="{children: 'children'}"> style="width: 100%">
-      <el-table-column align="center" label="ID">
+      <el-table-column align="center" label="分类ID">
         <template slot-scope="scope">
           <span>{{ scope.row._id }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Icon">
+      <el-table-column align="center" label="分类 Icon">
         <template slot-scope="scope">
           <img width="100" :src="scope.row.icon" alt="">
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Title">
+      <el-table-column align="center" label="分类名称">
         <template slot-scope="scope">
           <span>{{ scope.row.title }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="CreatedAt">
+      <el-table-column align="center" label="创建时间">
         <template slot-scope="scope">
           <span>{{ scope.row.created_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Actions">
+      <el-table-column align="center" label="操作">
         <template slot-scope="{row}">
           <router-link :to="'/product/category/edit/'+row._id">
             <el-button type="primary" size="small" icon="el-icon-edit">
-              Edit
+              修改
             </el-button>
           </router-link>
           <el-button v-if="row.status!='deleted'" size="small" type="danger" icon="el-icon-delete" @click="handleDelete(row)">
-            Delete
+            删除
           </el-button>
         </template>
       </el-table-column>
