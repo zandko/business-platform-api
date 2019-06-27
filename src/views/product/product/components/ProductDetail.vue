@@ -111,7 +111,7 @@
                 <el-input type="hidden" name="attributeIdList" :value="item._id" />
               </span>
               <span v-else-if="item.attr_type === 2">
-                <el-input v-model="attributeValueList[index]" :rows="1" type="textarea" class="article-textarea" autosize />                
+                <el-input v-model="attributeValueList[index]" :rows="1" type="textarea" class="article-textarea" autosize />
                 <el-input type="hidden" name="attributeIdList" :value="item._id" />
               </span>
               <span v-if="item.attr_type === 3">
@@ -125,7 +125,7 @@
           <el-tab-pane label="其他信息" name="other">
             <el-form-item label-width="100px" label="选择颜色:" class="postInfo-container-item">
               <el-checkbox-group v-model="colorList" @change="handleColorChange">
-                <el-checkbox v-for="item in ColorListCheckbox" :key="item.value" :label="item._id" :style="{color: item.value}">{{ item.name }}</el-checkbox>
+                <el-checkbox v-for="item in ColorListCheckbox" :key="item.value" :label="item._id" border style="font-weight: bold; color: #000;" :style="{background: item.value}">{{ item.name }}</el-checkbox>
               </el-checkbox-group>
             </el-form-item>
             <el-form-item style="margin-bottom: 40px;" label-width="100px" label="更多属性:">

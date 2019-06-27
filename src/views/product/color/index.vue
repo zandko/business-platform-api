@@ -5,7 +5,7 @@
         Add
       </el-button>
     </div>
-    <el-table :key="tableKey" v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%">
+    <el-table :key="tableKey" v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%" :row-style="tableRowClassName">
       <el-table-column align="center" label="ID">
         <template slot-scope="scope">
           <span>{{ scope.row._id }}</span>
@@ -98,6 +98,9 @@ export default {
     this.getList()
   },
   methods: {
+    tableRowClassName({row, rowIndex}) {
+      return 'background-color:' + row.value
+    },
     getList() {
       this.listLoading = true
       getProductColor(this.listQuery).then(response => {

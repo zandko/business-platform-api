@@ -1,9 +1,9 @@
 <template>
-  <product-detail :is-edit="true" />
+  <product-detail :is-edit="false" />
 </template>
 
 <script>
-import ProductDetail from '../components/ProductDetail'
+import ProductDetail from './components/ProductDetail'
 
 export default {
   name: 'CreateForm',

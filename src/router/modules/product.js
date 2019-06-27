@@ -16,29 +16,21 @@ const productRouter = {
       path: 'category',
       component: () => import('@/views/product/category/index'),
       name: 'ProdyctCategory',
-      redirect: '/product/category/list',
-      meta: { title: '产品分类' },
-      children: [
-        {
-          path: 'list',
-          component: () => import('@/views/product/category/list/index'),
-          name: 'ProdyctCategoryList',
-          meta: { title: '分类列表' }
-        },
-        {
-          path: 'create',
-          component: () => import('@/views/product/category/create/index'),
-          name: 'ProdyctCategoryCreate',
-          meta: { title: '添加分类' }
-        },
-        {
-          path: 'edit/:id',
-          component: () => import('@/views/product/category/edit/index'),
-          name: 'ProdyctCategoryEdit',
-          meta: { title: '修改分类' },
-          hidden: true
-        }
-      ]
+      meta: { title: '分类列表' },
+    },
+    {
+      path: 'category/create',
+      component: () => import('@/views/product/category/create'),
+      name: 'ProdyctCategoryCreate',
+      meta: { title: '添加分类' },
+      hidden: true
+    },
+    {
+      path: 'category/edit/:id',
+      component: () => import('@/views/product/category/edit'),
+      name: 'ProdyctCategoryEdit',
+      meta: { title: '修改分类' },
+      hidden: true
     },
     {
       path: 'type',
@@ -60,32 +52,24 @@ const productRouter = {
       meta: { title: '产品颜色' }
     },
     {
-      path: 'product',
+      path: 'list',
       component: () => import('@/views/product/product/index'),
       name: 'ProductProduct',
-      redirect: '/product/product/list',
-      meta: { title: '产品管理' },
-      children: [
-        {
-          path: 'list',
-          component: () => import('@/views/product/product/list/index'),
-          name: 'ProdyctProductList',
-          meta: { title: '产品列表' }
-        },
-        {
-          path: 'create',
-          component: () => import('@/views/product/product/create/index'),
-          name: 'ProdyctProductCreate',
-          meta: { title: '添加产品' }
-        },
-        {
-          path: 'edit/:id',
-          component: () => import('@/views/product/product/edit/index'),
-          name: 'ProdyctProductEdit',
-          meta: { title: '修改产品' },
-          hidden: true
-        }
-      ]
+      meta: { title: '产品列表' },
+    },
+    {
+      path: 'create',
+      component: () => import('@/views/product/product/create'),
+      name: 'ProdyctProductCreate',
+      meta: { title: '添加产品' },
+      hidden: true
+    },
+    {
+      path: 'edit/:id',
+      component: () => import('@/views/product/product/edit'),
+      name: 'ProdyctProductEdit',
+      meta: { title: '修改产品' },
+      hidden: true
     }
   ]
 }
