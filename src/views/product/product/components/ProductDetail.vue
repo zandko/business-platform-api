@@ -108,13 +108,13 @@
             <el-form-item v-for="(item, index) in TypeAttributeList" :key="item._id" style="margin-bottom: 40px;" label-width="100px" :label="item.title + ':'">
               <span v-if="item.attr_type === 1">
                 <el-input v-if="isEdit" v-model="attributeValueList[index].value" />
-                <el-input v-else v-model="attributeValueList[index].value" />
-                <el-input type="hidden" name="attributeIdList" :value="isEdit ? attributeValueList[index]._id : item._id" />
+                <el-input v-else v-model="attributeValueList[index]" />
+                <el-input v-if="isEdit" type="hidden" name="attributeIdList" :value="item._id" />
               </span>
               <span v-else-if="item.attr_type === 2">
                 <el-input v-if="isEdit" v-model="attributeValueList[index].value" :rows="1" type="textarea" class="article-textarea" autosize />
                 <el-input v-else v-model="attributeValueList[index]" :rows="1" type="textarea" class="article-textarea" autosize />
-                <el-input type="hidden" name="attributeIdList" :value="isEdit ? attributeValueList[index]._id : item._id" />
+                <el-input v-if="isEdit" type="hidden" name="attributeIdList" :value="item._id" />
               </span>
               <span v-if="item.attr_type === 3">
                 <el-select v-if="isEdit" v-model="attributeValueList[index].value" placeholder="请选择">
@@ -123,7 +123,7 @@
                 <el-select v-else v-model="attributeValueList[index]" placeholder="请选择">
                   <el-option v-for="item1 in item.attr_value.split('\n')" :key="item1" :label="item1" :value="item1" />
                 </el-select>
-                <el-input type="hidden" name="attributeIdList" :value="isEdit ? attributeValueList[index]._id : item._id" />
+                <el-input type="hidden" name="attributeIdList" :value="item._id" />
               </span>
             </el-form-item>
           </el-tab-pane>
@@ -154,13 +154,15 @@
           </el-tab-pane>
           <el-tab-pane label="产品相册" name="album">
             <el-upload
-              action="http://127.0.0.1:7001/api/v1/common/upload"
+              action="http://127.0.0.1:7002/api/v1/common/upload"
               list-type="picture-card"
+              multiple
               :headers="headers"
-              :file-list="fileList"
               :on-preview="handlePictureCardPreview"
               :on-success="handleSuccess"
               :on-remove="handleRemove"
+              :on-change="handleChange"
+              :file-list="fileList"
             >
               <i class="el-icon-plus" />
             </el-upload>
@@ -180,7 +182,7 @@ import Upload from '@/components/Upload/SingleImage3'
 import { getToken } from '@/utils/auth'
 import MDinput from '@/components/MDinput'
 import Sticky from '@/components/Sticky' // 粘性header组件
-import { fetchProduct, getProductCategory, getProductType, getProductTypeAttribute, getProductColor, createProduct } from '@/api/product'
+import { fetchProduct, updateProduct, getProductCategory, getProductType, getProductTypeAttribute, getProductColor, createProduct } from '@/api/product'
 
 const defaultForm = {
   _id: undefined,
@@ -233,7 +235,7 @@ export default {
       CategoryListOptions: [],
       TypeListOptions: [],
       ColorListCheckbox: [],
-      fileList: undefined,
+      fileList: [],
       dialogImageUrl: '',
       dialogVisible: false,
       rules: {
@@ -284,6 +286,9 @@ export default {
       })
       this.postForm.image_url = [...new Set(imageList)]
     },
+    handleChange(file, fileList) {
+      // console.log(file, fileList)
+    },
     handleRemove(file, fileList) {
       const imageList = []
       fileList.forEach(element => {
@@ -291,7 +296,15 @@ export default {
           imageList.push(element.url)
         }
       })
-      this.postForm.image_url = [...new Set(imageList)]
+
+      if (this.isEdit) {
+        this.fileList.forEach((item, index) => {
+          if (item.url === file.url) {
+            this.fileList.splice(index, 1)
+          }
+        })
+        this.fileList = this.fileList.concat([...new Set(imageList)])
+      } else this.postForm.image_url = [...new Set(imageList)]
     },
     handlePictureCardPreview(file) {
       this.dialogImageUrl = file.url
@@ -311,9 +324,9 @@ export default {
       this.postForm.color = colorList.join(',')
     },
     handleClick(tab, event) {
-      if (this.isEdit && tab.name === 'packing') {
-        this.handleProductTypeChange(this.postForm.product_type_id)
-      }
+      // if (this.isEdit && tab.name === 'packing') {
+      //   this.handleProductTypeChange(this.postForm.product_type_id)
+      // }
     },
     fetchData(id) {
       fetchProduct(id).then(response => {
@@ -325,6 +338,7 @@ export default {
         this.attributeValueList = response.productAttribute
         this.colorList = response.productResult.color.split(',')
         this.fileList = response.productImage
+        this.handleProductTypeChange(this.postForm.product_type_id)
         // set tagsview title
         this.setTagsViewTitle()
 
@@ -354,25 +368,49 @@ export default {
       })
       this.postForm.onsale_at = new Date(this.postForm.onsale_at).getTime()
       this.postForm.attr_value = attributeList
+      if (this.isEdit) {
+        const fileList = []
+        this.fileList.forEach((element) => {
+          fileList.push(element.url)
+        })
+        // const imageList = fileList.concat(this.postForm.image_url)
+        // const image_url = imageList.filter(current => {
+        //   return current !== null && current !== undefined
+        // })
+        this.postForm.image_url = fileList
+      }
+
+      console.log(this.postForm)
       this.$refs.postForm.validate(valid => {
         if (valid) {
           this.loading = true
-          createProduct(this.postForm).then(response => {
-            this.$notify({
-              title: '成功',
-              message: '添加成功',
-              type: 'success',
-              duration: 2000
-            })
-            this.loading = false
-            this.$router.push({
-              name: 'ProductList'
-            })
-          })
+          this.isEdit ? this.updateProduct() : this.createProduct()
         } else {
           console.log('error submit!!')
           return false
         }
+      })
+    },
+    Jump() {
+      this.$notify({
+        title: '成功',
+        message: this.isEdit ? '修改成功' : '添加成功',
+        type: 'success',
+        duration: 2000
+      })
+      this.loading = false
+      this.$router.push({
+        name: 'ProductList'
+      })
+    },
+    createProduct() {
+      createProduct(this.postForm).then(response => {
+        this.Jump()
+      })
+    },
+    updateProduct() {
+      updateProduct(this.postForm, this.postForm._id).then(response => {
+        this.Jump()
       })
     },
     getRemoteCategoryList() {

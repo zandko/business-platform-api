@@ -78,9 +78,9 @@
   display: inline-flex !important;
 }
 
-.el-table__header, .el-table__body {
-  table-layout: auto !important;
-}
+// .el-table__header, .el-table__body {
+//   table-layout: auto !important;
+// }
 
 .demo-table-expand {
   font-size: 0;
@@ -93,4 +93,11 @@
   margin-right: 0;
   margin-bottom: 0;
   width: 50%;
+}
+
+.el-form-item__content {
+  width: 80%;
+  overflow: hidden;
+  white-space: normal;
+  text-overflow: ellipsis;
 }

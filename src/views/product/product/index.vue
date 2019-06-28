@@ -14,41 +14,43 @@
             <el-form-item label="产品ID：">
               <span>{{ props.row._id }}</span>
             </el-form-item>
-            <el-form-item label="产品赠品">
+            <el-form-item v-show="props.row.gift" label="产品赠品">
               <span>{{ props.row.gift }}</span>
             </el-form-item>
-            <el-form-item label="附属标题：">
+            <el-form-item v-show="props.row.subsidiary_title" label="附属标题：">
               <span>{{ props.row.subsidiary_title }}</span>
             </el-form-item>
-            <el-form-item label="产品赠品">
+            <el-form-item v-show="props.row.gift" label="产品赠品">
               <span>{{ props.row.gift }}</span>
             </el-form-item>
-            <el-form-item label="产品版本：">
+            <el-form-item v-show="props.row.version" label="产品版本：">
               <span>{{ props.row.version }}</span>
             </el-form-item>
-            <el-form-item label="产品配件：">
+            <el-form-item v-show="props.row.fitting" label="产品配件：">
               <span>{{ props.row.fitting }}</span>
             </el-form-item>
-            <el-form-item label="关键字：">
-              <span>{{ props.row.keywords }}</span>
+            <el-form-item label="创建时间：">
+              <span>{{ props.row.created_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
             </el-form-item>
-            <el-form-item label="关联产品：">
+            <el-form-item v-show="props.row.relation" label="关联产品：">
               <span>{{ props.row.relation }}</span>
             </el-form-item>
-            <el-form-item label="产品描述：">
-              <span>{{ props.row.description }}</span>
-            </el-form-item>
-            <el-form-item label="更多属性：">
+            <!-- <el-form-item label="产品描述：">
+              <span :title="props.row.description">{{ props.row.description }}</span>
+            </el-form-item> -->
+            <!-- <el-form-item label="更多属性：">
               <span>{{ props.row.attrs }}</span>
-            </el-form-item>
+            </el-form-item> -->
             <el-form-item label="评论数量：">
               <span>{{ props.row.comment_count }}</span>
             </el-form-item>
             <el-form-item label="产品颜色：">
-              <span>{{ props.row.color }}</span>
+              <span v-for="item in ColorList" :key="item._id">
+                <span v-if="props.row.color.includes(item._id)">{{ item.name }}、</span>
+              </span>
             </el-form-item>
             <el-form-item label="评论星数：">
-              <svg-icon v-for="n in + props.row.comment_star" :key="n" icon-class="star" class="meta-item__icon" />
+              <svg-icon v-for="n in + props.row.comment_star || 5" :key="n" icon-class="star" class="meta-item__icon" />
             </el-form-item>
             <el-form-item label="产品SN：">
               <span>{{ props.row.sn }}</span>
@@ -56,12 +58,19 @@
           </el-form>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="产品封面图">
+      <el-table-column align="center" width="80" label="封面图">
         <template slot-scope="scope">
-          <img width="100" :src="scope.row.image" alt="">
+          <img width="50" :src="scope.row.image" alt="">
         </template>
       </el-table-column>
       <el-table-column align="center" label="产品标题" prop="title" />
+      <el-table-column align="center" label="所属分类">
+        <template slot-scope="scope">
+          <span v-for="item in CategoryList" :key="item._id">
+            <span v-if="scope.row.product_category_id === item._id">{{ item.title }}</span>
+          </span>
+        </template>
+      </el-table-column>
       <el-table-column align="center" width="100" label="产品价格">
         <template slot-scope="scope">
           <span>{{ scope.row.price }} / {{ scope.row.market_price }}</span>
@@ -104,7 +113,7 @@
 </template>
 
 <script>
-import { getProduct, deleteProductCategory } from '@/api/product'
+import { getProduct, deleteProduct, getProductCategory, getProductColor } from '@/api/product'
 import waves from '@/directive/waves'
 import Pagination from '@/components/Pagination'
 
@@ -116,6 +125,8 @@ export default {
     return {
       tableKey: 0,
       list: [],
+      CategoryList: [],
+      ColorList: [],
       listLoading: true,
       total: 0,
       listQuery: {
@@ -126,6 +137,8 @@ export default {
   },
   created() {
     this.getList()
+    this.getRemoteCategoryList()
+    this.getRemoteColorList()
   },
   methods: {
     getList() {
@@ -133,6 +146,9 @@ export default {
       getProduct(this.listQuery).then(response => {
         this.total = response.total
         this.list = response.data
+        response.data.forEach((element, index) => {
+          this.list[index].color = element.color.split(',')
+        })
         this.listLoading = false
       })
     },
@@ -142,7 +158,7 @@ export default {
         cancelButtonText: 'Cancel',
         type: 'warning'
       }).then(() => {
-        deleteProductCategory(row._id).then(response => {
+        deleteProduct(row._id).then(response => {
           this.$notify({
             title: 'Success',
             message: 'Delete Successfully',
@@ -159,6 +175,17 @@ export default {
           type: 'info',
           duration: 2000
         })
+      })
+    },
+    getRemoteCategoryList() {
+      getProductCategory().then(response => {
+        if (!response) return
+        this.CategoryList = response.map(v => v)
+      })
+    },
+    getRemoteColorList() {
+      getProductColor().then(response => {
+        this.ColorList = response
       })
     }
   }

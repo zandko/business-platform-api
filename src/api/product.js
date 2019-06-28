@@ -161,3 +161,18 @@ export function createProduct(data) {
     data
   })
 }
+
+export function updateProduct(data, id) {
+  return request({
+    url: `v1/admin/product/${id}`,
+    method: 'put',
+    data
+  })
+}
+
+export function deleteProduct(id) {
+  return request({
+    url: `v1/admin/product/${id}`,
+    method: 'delete'
+  })
+}

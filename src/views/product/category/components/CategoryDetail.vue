@@ -143,34 +143,27 @@ export default {
         }
       })
     },
+    Jump() {
+      this.$notify({
+        title: '成功',
+        message: this.isEdit ? '修改成功' : '创建成功',
+        type: 'success',
+        duration: 2000
+      })
+      this.status = 'published'
+      this.loading = false
+      this.$router.push({
+        name: 'ProdyctCategory'
+      })
+    },
     createProductCategory() {
       createProductCategory(this.postForm).then((response) => {
-        this.$notify({
-          title: '成功',
-          message: '创建成功',
-          type: 'success',
-          duration: 2000
-        })
-        this.status = 'published'
-        this.loading = false
-        this.$router.push({
-          name: 'ProdyctCategoryList'
-        })
+        this.Jump()
       })
     },
     updateProductCategory() {
       updateProductCategory(this.postForm, this.postForm._id).then((response) => {
-        this.$notify({
-          title: '成功',
-          message: '修改成功',
-          type: 'success',
-          duration: 2000
-        })
-        this.status = 'published'
-        this.loading = false
-        this.$router.push({
-          name: 'ProdyctCategoryList'
-        })
+        this.Jump()
       })
     },
     getRemoteCategoryList(query) {
