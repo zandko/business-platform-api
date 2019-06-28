@@ -2,6 +2,9 @@
   <div class="createPost-container">
     <el-form ref="postForm" :model="postForm" :rules="rules" class="form-container">
       <sticky :z-index="10" :class-name="'sub-navbar draft'">
+        <el-button v-if="uploadStatus" v-loading="loading" style="margin-left: 10px;" type="primary" @click="handleChange">
+          上传
+        </el-button>
         <el-button v-loading="loading" style="margin-left: 10px;" type="success" @click="submitForm">
           {{ isEdit ? '修改' : '创建' }}
         </el-button>
@@ -107,20 +110,15 @@
             </el-form-item>
             <el-form-item v-for="(item, index) in TypeAttributeList" :key="item._id" style="margin-bottom: 40px;" label-width="100px" :label="item.title + ':'">
               <span v-if="item.attr_type === 1">
-                <el-input v-if="isEdit" v-model="attributeValueList[index].value" />
-                <el-input v-else v-model="attributeValueList[index]" />
-                <el-input v-if="isEdit" type="hidden" name="attributeIdList" :value="item._id" />
+                <el-input v-model="attributeValueList[index]" />
+                <el-input type="hidden" name="attributeIdList" :value="item._id" />
               </span>
               <span v-else-if="item.attr_type === 2">
-                <el-input v-if="isEdit" v-model="attributeValueList[index].value" :rows="1" type="textarea" class="article-textarea" autosize />
-                <el-input v-else v-model="attributeValueList[index]" :rows="1" type="textarea" class="article-textarea" autosize />
-                <el-input v-if="isEdit" type="hidden" name="attributeIdList" :value="item._id" />
+                <el-input v-model="attributeValueList[index]" :rows="1" type="textarea" class="article-textarea" autosize />
+                <el-input type="hidden" name="attributeIdList" :value="item._id" />
               </span>
               <span v-if="item.attr_type === 3">
-                <el-select v-if="isEdit" v-model="attributeValueList[index].value" placeholder="请选择">
-                  <el-option v-for="item1 in item.attr_value.split('\n')" :key="item1" :label="item1" :value="item1" />
-                </el-select>
-                <el-select v-else v-model="attributeValueList[index]" placeholder="请选择">
+                <el-select v-model="attributeValueList[index]" placeholder="请选择">
                   <el-option v-for="item1 in item.attr_value.split('\n')" :key="item1" :label="item1" :value="item1" />
                 </el-select>
                 <el-input type="hidden" name="attributeIdList" :value="item._id" />
@@ -153,22 +151,28 @@
             </el-form-item>
           </el-tab-pane>
           <el-tab-pane label="产品相册" name="album">
+            <div>
+              <VueGallery :images="image_url" :index="index" @close="index = null" />
+              <div v-for="(image, imageIndex) in image_url" :key="imageIndex" @click="index = imageIndex" class="image" :style="{ backgroundImage: 'url(' + image + ')', width: '300px', height: '200px' }" >
+                 <el-select v-model="postForm.keywords" class="select-color" placeholder="请选择关联颜色">
+                  <el-option v-for="item in ColorListCheckbox" :key="item._id" :label="item.name" :value="item._id" />
+                </el-select>
+              </div>
+            </div>
             <el-upload
-              action="http://127.0.0.1:7002/api/v1/common/upload"
-              list-type="picture-card"
+              v-show="false"
+              action="http://127.0.0.1:7001/api/v1/common/upload"
+              drag
               multiple
+              class="upload-demo"
               :headers="headers"
-              :on-preview="handlePictureCardPreview"
               :on-success="handleSuccess"
               :on-remove="handleRemove"
-              :on-change="handleChange"
-              :file-list="fileList"
             >
-              <i class="el-icon-plus" />
+              <i ref="upload" class="el-icon-upload" />
+              <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+              <div slot="tip" class="el-upload__tip"> 只能上传jpg/png文件，且不超过500kb</div>
             </el-upload>
-            <el-dialog :visible.sync="dialogVisible">
-              <img width="100%" :src="dialogImageUrl" alt="">
-            </el-dialog>
           </el-tab-pane>
         </el-tabs>
       </div>
@@ -181,6 +185,7 @@ import Tinymce from '@/components/Tinymce'
 import Upload from '@/components/Upload/SingleImage3'
 import { getToken } from '@/utils/auth'
 import MDinput from '@/components/MDinput'
+import VueGallery from 'vue-gallery'
 import Sticky from '@/components/Sticky' // 粘性header组件
 import { fetchProduct, updateProduct, getProductCategory, getProductType, getProductTypeAttribute, getProductColor, createProduct } from '@/api/product'
 
@@ -215,7 +220,7 @@ const defaultForm = {
 
 export default {
   name: 'ProductDetail',
-  components: { Tinymce, MDinput, Upload, Sticky },
+  components: { Tinymce, MDinput, Upload, Sticky, VueGallery },
   props: {
     isEdit: {
       type: Boolean,
@@ -227,6 +232,9 @@ export default {
       activeName: 'basic',
       postForm: Object.assign({}, defaultForm),
       loading: false,
+      uploadStatus: false,
+      image_url: [],
+      index: null,
       colorList: [],
       attributeIdList: [],
       attributeValueList: [],
@@ -235,7 +243,6 @@ export default {
       CategoryListOptions: [],
       TypeListOptions: [],
       ColorListCheckbox: [],
-      fileList: [],
       dialogImageUrl: '',
       dialogVisible: false,
       rules: {
@@ -277,38 +284,24 @@ export default {
     this.tempRoute = Object.assign({}, this.$route)
   },
   methods: {
+    handleChange() {
+      this.$refs.upload.click()
+    },
     handleSuccess(response, file, fileList) {
-      const imageList = []
       fileList.forEach(element => {
         if (element.status === 'success') {
-          imageList.push(element.response.url)
+          this.image_url.push(element.response.url)
         }
       })
-      this.postForm.image_url = [...new Set(imageList)]
-    },
-    handleChange(file, fileList) {
-      // console.log(file, fileList)
+      this.image_url = [...new Set(this.image_url)]
     },
     handleRemove(file, fileList) {
-      const imageList = []
       fileList.forEach(element => {
         if (element.status === 'success') {
-          imageList.push(element.url)
+          this.image_url.push(element.url)
         }
       })
-
-      if (this.isEdit) {
-        this.fileList.forEach((item, index) => {
-          if (item.url === file.url) {
-            this.fileList.splice(index, 1)
-          }
-        })
-        this.fileList = this.fileList.concat([...new Set(imageList)])
-      } else this.postForm.image_url = [...new Set(imageList)]
-    },
-    handlePictureCardPreview(file) {
-      this.dialogImageUrl = file.url
-      this.dialogVisible = true
+      this.image_url = [...new Set(this.image_url)]
     },
     handleProductTypeChange(val) {
       this.getRemoteTypeAttribute(val)
@@ -324,9 +317,7 @@ export default {
       this.postForm.color = colorList.join(',')
     },
     handleClick(tab, event) {
-      // if (this.isEdit && tab.name === 'packing') {
-      //   this.handleProductTypeChange(this.postForm.product_type_id)
-      // }
+      if (tab.name === 'album') this.uploadStatus = true
     },
     fetchData(id) {
       fetchProduct(id).then(response => {
@@ -335,10 +326,15 @@ export default {
         response.productResult.is_best ? this.recommendList.push('is_best') : ''
         response.productResult.is_new ? this.recommendList.push('is_new') : ''
         response.productResult.is_rec ? this.recommendList.push('is_rec') : ''
-        this.attributeValueList = response.productAttribute
+        response.productAttribute.forEach((element) => {
+          this.attributeValueList.push(element.value)
+        })
+        response.productImage.forEach((element) => {
+          this.image_url.push(element.url)
+        })
         this.colorList = response.productResult.color.split(',')
-        this.fileList = response.productImage
         this.handleProductTypeChange(this.postForm.product_type_id)
+        
         // set tagsview title
         this.setTagsViewTitle()
 
@@ -368,19 +364,8 @@ export default {
       })
       this.postForm.onsale_at = new Date(this.postForm.onsale_at).getTime()
       this.postForm.attr_value = attributeList
-      if (this.isEdit) {
-        const fileList = []
-        this.fileList.forEach((element) => {
-          fileList.push(element.url)
-        })
-        // const imageList = fileList.concat(this.postForm.image_url)
-        // const image_url = imageList.filter(current => {
-        //   return current !== null && current !== undefined
-        // })
-        this.postForm.image_url = fileList
-      }
+      this.postForm.image_url = this.image_url
 
-      console.log(this.postForm)
       this.$refs.postForm.validate(valid => {
         if (valid) {
           this.loading = true
@@ -441,7 +426,21 @@ export default {
 
 <style lang="scss" scoped>
 @import "~@/styles/mixin.scss";
-
+.image {
+  position: relative;
+  float: left;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  border: 1px solid #ebebeb;
+  margin: 10px;
+  .select-color {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
 .createPost-container {
   position: relative;
 
