@@ -78,9 +78,9 @@
   display: inline-flex !important;
 }
 
-// .el-table__header, .el-table__body {
-//   table-layout: auto !important;
-// }
+.el-table__header, .el-table__body, .el-table__footer {
+  table-layout: inherit !important;
+}
 
 .demo-table-expand {
   font-size: 0;

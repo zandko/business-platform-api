@@ -92,8 +92,8 @@ export const asyncRoutes = [
 
   /** when your routing map is too long, you can split it into small modules **/
   componentsRouter,
-  systemRouter,
   productRouter,
+  systemRouter,
   {
     path: '/example',
     component: Layout,

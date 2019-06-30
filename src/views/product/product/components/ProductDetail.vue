@@ -1,7 +1,7 @@
 <template>
   <div class="createPost-container">
     <el-form ref="postForm" :model="postForm" :rules="rules" class="form-container">
-      <sticky :z-index="10" :class-name="'sub-navbar draft'">
+      <sticky :z-index="10" :class-name="'sub-navbar '+status">
         <el-button v-if="uploadStatus" v-loading="loading" style="margin-left: 10px;" type="primary" @click="handleChange">
           上传
         </el-button>
@@ -108,17 +108,17 @@
                 <el-option v-for="item in TypeListOptions" :key="item._id" :label="item.title" :value="item._id" />
               </el-select>
             </el-form-item>
-            <el-form-item v-for="(item, index) in TypeAttributeList" :key="item._id" style="margin-bottom: 40px;" label-width="100px" :label="item.title + ':'">
+            <el-form-item v-for="(item, i) in TypeAttributeList" :key="item._id" style="margin-bottom: 40px;" label-width="100px" :label="item.title + ':'">
               <span v-if="item.attr_type === 1">
-                <el-input v-model="attributeValueList[index]" />
+                <el-input v-model="attributeValueList[i]" />
                 <el-input type="hidden" name="attributeIdList" :value="item._id" />
               </span>
               <span v-else-if="item.attr_type === 2">
-                <el-input v-model="attributeValueList[index]" :rows="1" type="textarea" class="article-textarea" autosize />
+                <el-input v-model="attributeValueList[i]" :rows="1" type="textarea" class="article-textarea" autosize />
                 <el-input type="hidden" name="attributeIdList" :value="item._id" />
               </span>
               <span v-if="item.attr_type === 3">
-                <el-select v-model="attributeValueList[index]" placeholder="请选择">
+                <el-select v-model="attributeValueList[i]" placeholder="请选择">
                   <el-option v-for="item1 in item.attr_value.split('\n')" :key="item1" :label="item1" :value="item1" />
                 </el-select>
                 <el-input type="hidden" name="attributeIdList" :value="item._id" />
@@ -153,8 +153,8 @@
           <el-tab-pane label="产品相册" name="album">
             <div>
               <VueGallery :images="image_url" :index="index" @close="index = null" />
-              <div v-for="(image, imageIndex) in image_url" :key="imageIndex" @click="index = imageIndex" class="image" :style="{ backgroundImage: 'url(' + image + ')', width: '300px', height: '200px' }" >
-                 <el-select v-model="postForm.keywords" class="select-color" placeholder="请选择关联颜色">
+              <div v-for="(image, imageIndex) in image_url" :key="imageIndex" class="image" :style="{ backgroundImage: 'url(' + image + ')', width: '300px', height: '200px' }" @click="index = imageIndex">
+                <el-select v-model="postForm.keywords" class="select-color" placeholder="请选择关联颜色">
                   <el-option v-for="item in ColorListCheckbox" :key="item._id" :label="item.name" :value="item._id" />
                 </el-select>
               </div>
@@ -232,6 +232,7 @@ export default {
       activeName: 'basic',
       postForm: Object.assign({}, defaultForm),
       loading: false,
+      status: 'draft',
       uploadStatus: false,
       image_url: [],
       index: null,
@@ -334,7 +335,6 @@ export default {
         })
         this.colorList = response.productResult.color.split(',')
         this.handleProductTypeChange(this.postForm.product_type_id)
-        
         // set tagsview title
         this.setTagsViewTitle()
 
@@ -383,9 +383,10 @@ export default {
         type: 'success',
         duration: 2000
       })
+      this.status = 'published'
       this.loading = false
       this.$router.push({
-        name: 'ProductList'
+        path: '/product/list/' + new Date()
       })
     },
     createProduct() {

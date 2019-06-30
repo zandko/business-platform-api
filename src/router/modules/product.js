@@ -5,7 +5,7 @@ import Layout from '@/layout'
 const productRouter = {
   path: '/product',
   component: Layout,
-  redirect: '/product/category',
+  redirect: '/product/list',
   name: 'Product',
   meta: {
     title: '产品管理',
@@ -52,7 +52,7 @@ const productRouter = {
       meta: { title: '产品颜色' }
     },
     {
-      path: 'list',
+      path: 'list/:date',
       component: () => import('@/views/product/product/index'),
       name: 'ProductList',
       meta: { title: '产品列表' }

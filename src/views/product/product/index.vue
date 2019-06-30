@@ -7,7 +7,7 @@
         </el-button>
       </router-link>
     </div>
-    <el-table :key="tableKey" v-loading="listLoading" :data="list" row-key="_id" border style="width: 100%">
+    <el-table :key="tableKey" v-loading="listLoading" :data="list" row-key="_id" border fit highlight-current-row :tree-props="{children: 'children'}"> style="width: 100%">
       <el-table-column type="expand">
         <template slot-scope="props">
           <el-form label-position="left" inline class="demo-table-expand">
@@ -35,14 +35,11 @@
             <el-form-item v-show="props.row.relation" label="关联产品：">
               <span>{{ props.row.relation }}</span>
             </el-form-item>
-            <!-- <el-form-item label="产品描述：">
-              <span :title="props.row.description">{{ props.row.description }}</span>
-            </el-form-item> -->
-            <!-- <el-form-item label="更多属性：">
-              <span>{{ props.row.attrs }}</span>
-            </el-form-item> -->
             <el-form-item label="评论数量：">
               <span>{{ props.row.comment_count }}</span>
+            </el-form-item>
+            <el-form-item label="上架时间：">
+              <span>{{ props.row.onsale_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
             </el-form-item>
             <el-form-item label="产品颜色：">
               <span v-for="item in ColorList" :key="item._id">
@@ -58,7 +55,7 @@
           </el-form>
         </template>
       </el-table-column>
-      <el-table-column align="center" width="80" label="封面图">
+      <el-table-column align="center" label="封面图">
         <template slot-scope="scope">
           <img width="50" :src="scope.row.image" alt="">
         </template>
@@ -71,12 +68,12 @@
           </span>
         </template>
       </el-table-column>
-      <el-table-column align="center" width="100" label="产品价格">
+      <el-table-column align="center" label="产品价格">
         <template slot-scope="scope">
           <span>{{ scope.row.price }} / {{ scope.row.market_price }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="库存" width="80" prop="stock" />
+      <el-table-column align="center" label="库存" prop="stock" />
       <el-table-column class-name="status-col" label="状态" width="110">
         <template slot-scope="{row}">
           <el-tag :type="row.status ? 'primary' : 'danger'">
@@ -89,11 +86,6 @@
           <span>{{ scope.row.is_new ? ' 新品 /' : '' }}{{ scope.row.is_rec ? ' 推荐 /' : '' }}{{ scope.row.is_best ? ' 精品' : '' }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="上架时间">
-        <template slot-scope="scope">
-          <span>{{ scope.row.onsale_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
-        </template>
-      </el-table-column>
       <el-table-column align="center" fixed="right" label="操作">
         <template slot-scope="{row}">
           <router-link :to="'/product/edit/'+row._id">
@@ -101,7 +93,7 @@
               修改
             </el-button>
           </router-link>
-          <el-button v-if="row.status!='deleted'" size="mini" type="danger" icon="el-icon-delete" @click="handleDelete(row)">
+          <el-button v-if="row.status!='deleted'" v-waves size="mini" type="danger" icon="el-icon-delete" @click="handleDelete(row)">
             删除
           </el-button>
         </template>
@@ -119,8 +111,8 @@ import Pagination from '@/components/Pagination'
 
 export default {
   name: 'ProductList',
-  directives: { waves },
   components: { Pagination },
+  directives: { waves },
   data() {
     return {
       tableKey: 0,
@@ -201,16 +193,4 @@ export default {
   right: 15px;
   top: 10px;
 }
-.demo-table-expand {
-    font-size: 0;
-  }
-  .demo-table-expand label {
-    width: 90px;
-    color: #99a9bf;
-  }
-  .demo-table-expand .el-form-item {
-    margin-right: 0;
-    margin-bottom: 0;
-    width: 50%;
-  }
 </style>
