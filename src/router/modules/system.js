@@ -28,8 +28,7 @@ const systemRouter = {
       path: 'privileges',
       component: () => import('@/views/system/privileges/index'),
       name: 'Privileges',
-      meta: { title: '权限管理' },
-      hidden: true
+      meta: { title: '权限管理' }
     }
   ]
 }

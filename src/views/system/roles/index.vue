@@ -16,6 +16,11 @@
           <span>{{ scope.row.role_name }}</span>
         </template>
       </el-table-column>
+      <el-table-column align="center" label="拥有权限">
+        <template slot-scope="scope">
+          <span>{{ scope.row.privilege_id }}</span>
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="操作">
         <template slot-scope="{row}">
           <el-button type="primary" size="small" icon="el-icon-edit" @click="handleUpdate(row)">
@@ -32,6 +37,11 @@
         <el-form-item label="角色名称" prop="role_name">
           <el-input v-model="temp.role_name" />
         </el-form-item>
+        <el-form-item label="角色权限" prop="privilege_id">
+          <el-drag-select v-model="temp.privilege_id" style="width:500px;" multiple placeholder="请选择">
+            <el-option v-for="item in privilegesListOptions" :key="item._id" :label="item.name" :value="item._id" />
+          </el-drag-select>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">
@@ -46,12 +56,12 @@
 </template>
 
 <script>
-import { getRoles, createRoles, updateRoles, deleteRoles } from '@/api/admin'
-import waves from '@/directive/waves'
+import { getRoles, createRoles, updateRoles, deleteRoles, getPrivileges } from '@/api/admin'
+import ElDragSelect from '@/components/DragSelect' // base on element-ui
 
 export default {
   name: 'Roles',
-  directives: { waves },
+  components: { ElDragSelect },
   data() {
     return {
       tableKey: 0,
@@ -59,8 +69,10 @@ export default {
       listLoading: true,
       temp: {
         id: undefined,
-        role_name: ''
+        role_name: '',
+        privilege_id: []
       },
+      privilegesListOptions: [],
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
@@ -68,14 +80,24 @@ export default {
         create: '创建'
       },
       rules: {
-        role_name: [{ required: true, message: '角色名称是必填项', trigger: 'blur' }]
+        role_name: [{ required: true, message: '角色名称是必填项', trigger: 'blur' }],
+        privilege_id: [{ required: true, message: '拥有权限是必填项', trigger: 'blur' }]
       }
     }
   },
   created() {
     this.getList()
+    this.getPrivileges()
   },
   methods: {
+    getPrivileges() {
+      getPrivileges({
+        page: 1,
+        pageSize: 999
+      }).then(response => {
+        this.privilegesListOptions = response.data
+      })
+    },
     getList() {
       this.listLoading = true
       getRoles().then(response => {
@@ -86,7 +108,8 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        role_name: ''
+        role_name: '',
+        privilege_id: []
       }
     },
     handleCreate() {
@@ -107,6 +130,14 @@ export default {
               title: '成功',
               message: '创建成功',
               type: 'success',
+              duration: 2000
+            })
+            this.getList()
+          }).catch((error) => {
+            this.$notify({
+              title: '失败',
+              message: error.request.response,
+              type: 'error',
               duration: 2000
             })
           })
@@ -140,6 +171,7 @@ export default {
               type: 'success',
               duration: 2000
             })
+            this.getList()
           })
         }
       })

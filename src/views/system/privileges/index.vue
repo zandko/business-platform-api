@@ -11,9 +11,19 @@
           <span>{{ scope.row._id }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="角色名称">
+      <el-table-column align="center" label="权限名称">
         <template slot-scope="scope">
-          <span>{{ scope.row.role_name }}</span>
+          <span>{{ scope.row.name }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="权限方法">
+        <template slot-scope="scope">
+          <span>{{ scope.row.method }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="权限路径">
+        <template slot-scope="scope">
+          <span>{{ scope.row.path }}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作">
@@ -29,8 +39,16 @@
     </el-table>
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="角色名称" prop="role_name">
-          <el-input v-model="temp.role_name" />
+        <el-form-item label="权限名称" prop="name">
+          <el-input v-model="temp.name" />
+        </el-form-item>
+        <el-form-item label="角色方法" prop="method">
+          <el-select v-model="temp.method">
+            <el-option v-for="item in methods" :key="item" :label="item" :value="item" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="权限路径" prop="path">
+          <el-input v-model="temp.path" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -42,16 +60,18 @@
         </el-button>
       </div>
     </el-dialog>
+
+    <pagination v-show="total > 0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.pageSize" @pagination="getList" />
   </div>
 </template>
 
 <script>
-import { getRoles, createRoles, updateRoles, deleteRoles } from '@/api/admin'
-import waves from '@/directive/waves'
+import { getPrivileges, createPrivileges, updatePrivileges, deletePrivileges } from '@/api/admin'
+import Pagination from '@/components/Pagination'
 
 export default {
   name: 'Roles',
-  directives: { waves },
+  components: { Pagination },
   data() {
     return {
       tableKey: 0,
@@ -59,7 +79,10 @@ export default {
       listLoading: true,
       temp: {
         id: undefined,
-        role_name: ''
+        name: '',
+        parent_id: undefined,
+        method: '',
+        path: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -67,8 +90,22 @@ export default {
         update: '修改',
         create: '创建'
       },
+      methods: [
+        'GET',
+        'POST',
+        'PUT',
+        'DELETE'
+      ],
+      total: 0,
+      listQuery: {
+        page: 1,
+        pageSize: 10
+      },
       rules: {
-        role_name: [{ required: true, message: '角色名称是必填项', trigger: 'blur' }]
+        name: [{ required: true, message: '权限名称是必填项', trigger: 'blur' }],
+        parent_id: [{ required: true, message: '权限名称是必填项', trigger: 'blur' }],
+        method: [{ required: true, message: '权限方法是必填项', trigger: 'blur' }],
+        path: [{ required: true, message: '权限路径是必填项', trigger: 'blur' }]
       }
     }
   },
@@ -78,15 +115,19 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      getRoles().then(response => {
-        this.list = response
+      getPrivileges(this.listQuery).then(response => {
+        this.total = response.total
+        this.list = response.data
         this.listLoading = false
       })
     },
     resetTemp() {
       this.temp = {
         id: undefined,
-        role_name: ''
+        name: '',
+        parent_id: undefined,
+        method: '',
+        path: ''
       }
     },
     handleCreate() {
@@ -100,13 +141,22 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          createRoles(this.temp).then((response) => {
+          createPrivileges(this.temp).then((response) => {
             this.list.unshift(response)
             this.dialogFormVisible = false
             this.$notify({
               title: '成功',
               message: '创建成功',
               type: 'success',
+              duration: 2000
+            })
+            this.getList()
+          }).catch((error) => {
+            console.log(error)
+            this.$notify({
+              title: '失败',
+              message: error.request.response,
+              type: 'error',
               duration: 2000
             })
           })
@@ -125,7 +175,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateRoles(tempData, tempData._id).then(() => {
+          updatePrivileges(tempData, tempData._id).then(() => {
             for (const v of this.list) {
               if (v._id === this.temp._id) {
                 const index = this.list.indexOf(v)
@@ -140,6 +190,7 @@ export default {
               type: 'success',
               duration: 2000
             })
+            this.getList()
           })
         }
       })
@@ -150,7 +201,7 @@ export default {
         cancelButtonText: 'Cancel',
         type: 'warning'
       }).then(() => {
-        deleteRoles(row._id).then(response => {
+        deletePrivileges(row._id).then(response => {
           this.$notify({
             title: '成功',
             message: '删除成功',
@@ -159,6 +210,7 @@ export default {
           })
           const index = this.list.indexOf(row)
           this.list.splice(index, 1)
+          this.getList()
         })
       }).catch(() => {
         this.$notify({
