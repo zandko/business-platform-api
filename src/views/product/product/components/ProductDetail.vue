@@ -386,7 +386,7 @@ export default {
       this.status = 'published'
       this.loading = false
       this.$router.push({
-        path: '/product/list/' + new Date()
+        name: 'ProductList'
       })
     },
     createProduct() {

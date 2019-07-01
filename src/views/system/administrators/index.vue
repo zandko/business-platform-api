@@ -1,28 +1,9 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.title" placeholder="Title" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-select v-model="listQuery.importance" placeholder="Imp" clearable style="width: 90px" class="filter-item">
-        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
-      </el-select>
-      <el-select v-model="listQuery.type" placeholder="Type" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
-      </el-select>
-      <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
-        <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
-      </el-select>
-      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
-        搜索
+      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-plus" @click="handleCreate">
+        创建
       </el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
-        添加
-      </el-button>
-      <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
-        导出
-      </el-button>
-      <el-checkbox v-model="showReviewer" class="filter-item" style="margin-left:15px;" @change="tableKey=tableKey+1">
-        reviewer
-      </el-checkbox>
     </div>
     <el-table :key="tableKey" v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%">
       <el-table-column align="center" label="ID">
@@ -30,101 +11,159 @@
           <span>{{ scope.row._id }}</span>
         </template>
       </el-table-column>
-      <!--
-      <el-table-column width="180px" align="center" label="Date">
+      <el-table-column align="center" label="用户头像">
         <template slot-scope="scope">
-          <span>{{ scope.row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
+          <img width="50" :src="scope.row.avatar ">
         </template>
-      </el-table-column> -->
-
-      <el-table-column align="center" label="Author">
+      </el-table-column>
+      <el-table-column align="center" label="用户名">
         <template slot-scope="scope">
           <span>{{ scope.row.account }}</span>
         </template>
       </el-table-column>
-
-      <el-table-column align="center" label="Actions">
+      <el-table-column align="center" label="拥有角色">
         <template slot-scope="scope">
-          <router-link :to="'/example/edit/'+scope.row._id">
-            <el-button type="primary" size="small" icon="el-icon-edit">
-              Edit
-            </el-button>
-          </router-link>
+          <el-tag v-for="item in scope.row.roles" :key="item">{{ item }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column v-show="false" align="center" label="角色ID">
+        <template slot-scope="scope">
+          <el-tag v-for="item in scope.row.role_id" :key="item">{{ item }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column width="180px" align="center" label="创建时间">
+        <template slot-scope="scope">
+          <span>{{ scope.row.created_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="操作">
+        <template slot-scope="{row}">
+          <el-button type="primary" size="small" icon="el-icon-edit" @click="handleUpdate(row)">
+            修改
+          </el-button>
+          <el-button v-if="row.status!='deleted'" size="small" type="danger" icon="el-icon-delete" @click="handleDelete(row)">
+            删除
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
-
-    <!-- <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" /> -->
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
+        <el-form-item label="头像" prop="avatar">
+          <pan-thumb :image="temp.avatar" />
+          <el-button type="primary" icon="upload" style="position: absolute;bottom: 15px;margin-left: 40px;" @click="imagecropperShow=true">
+            上传头像
+          </el-button>
+          <image-cropper
+            v-show="imagecropperShow"
+            :key="imagecropperKey"
+            :width="300"
+            :height="300"
+            url="http://127.0.0.1:7001/api/v1/common/upload"
+            lang-type="en"
+            @close="close"
+            @crop-upload-success="cropSuccess"
+          />
+        </el-form-item>
+        <el-form-item v-if="temp.account !== 'admin'" label-width="100px" label="角色:" class="postInfo-container-item" prop="role_id">
+          <el-drag-select v-model="temp.role_id" style="width:500px;" multiple placeholder="请选择">
+            <el-option v-for="item in rolesListOptions" :key="item._id" :label="item.role_name" :value="item._id" />
+          </el-drag-select>
+        </el-form-item>
+        <el-form-item label="用户名" prop="account">
+          <el-input v-model="temp.account" disabled />
+        </el-form-item>
+        <el-form-item v-if="dialogStatus === 'update'" label="密码">
+          <el-input v-model="temp.password" />
+        </el-form-item>
+        <el-form-item v-else label="密码" prop="password">
+          <el-input v-model="temp.password" />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">
+          取消
+        </el-button>
+        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">
+          确认
+        </el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getAdministrators } from '@/api/admin'
+import { getAdministrators, createAdministrators, deleteAdministrators, updateAdministrators, getRoles } from '@/api/admin'
 import waves from '@/directive/waves'
-// import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
-
-const calendarTypeOptions = [
-  { key: 'CN', display_name: 'China' },
-  { key: 'US', display_name: 'USA' },
-  { key: 'JP', display_name: 'Japan' },
-  { key: 'EU', display_name: 'Eurozone' }
-]
-
-const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
-  acc[cur.key] = cur.display_name
-  return acc
-}, {})
+import ImageCropper from '@/components/ImageCropper'
+import PanThumb from '@/components/PanThumb'
+import ElDragSelect from '@/components/DragSelect'
 
 export default {
   name: 'Administrators',
-  // components: { Pagination },
   directives: { waves },
-  filters: {
-    statusFilter(status) {
-      const statusMap = {
-        published: 'success',
-        draft: 'info',
-        deleted: 'danger'
-      }
-      return statusMap[status]
-    },
-    typeFilter(type) {
-      return calendarTypeKeyValue[type]
-    }
-  },
+  components: { ImageCropper, PanThumb, ElDragSelect },
   data() {
     return {
       tableKey: 0,
       list: null,
-      total: 0,
       listLoading: true,
-      listQuery: {
-        page: 1,
-        per_page: 20
+      imagecropperShow: false,
+      imagecropperKey: 0,
+      rolesListOptions: [],
+      temp: {
+        id: undefined,
+        role_id: [],
+        avatar: '',
+        account: '',
+        password: ''
       },
-      importanceOptions: [1, 2, 3],
-      calendarTypeOptions,
-      sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
-      downloadLoading: false,
-      showReviewer: false
+      dialogFormVisible: false,
+      dialogStatus: '',
+      textMap: {
+        update: '修改',
+        create: '创建'
+      },
+      rules: {
+        account: [{ required: true, message: '用户名是必填项', trigger: 'blur' }],
+        password: [{ required: true, message: '密码是必填项', trigger: 'blur' }],
+        role_id: [{ required: true, message: '角色是必填项', trigger: 'blur' }]
+      }
     }
   },
   created() {
     this.getList()
+    this.getRoles()
   },
   methods: {
+    getRoles() {
+      getRoles().then(response => {
+        this.rolesListOptions = response
+      })
+    },
+    cropSuccess(resData) {
+      this.imagecropperShow = false
+      this.imagecropperKey = this.imagecropperKey + 1
+      this.temp.avatar = resData.url
+    },
+    close() {
+      this.imagecropperShow = false
+    },
     getList() {
       this.listLoading = true
-      getAdministrators(this.listQuery).then(response => {
-        console.log(response.data)
-        this.list = response.data
-        // this.total = response.data.total
+      getAdministrators().then(response => {
+        this.list = response
         this.listLoading = false
       })
     },
-    handleFilter() {
-      this.listQuery.page = 1
-      this.getList()
+    resetTemp() {
+      this.temp = {
+        id: undefined,
+        role_id: [],
+        account: '',
+        password: '',
+        avatar: ''
+      }
     },
     handleCreate() {
       this.resetTemp()
@@ -134,18 +173,83 @@ export default {
         this.$refs['dataForm'].clearValidate()
       })
     },
-    handleDownload() {
-      this.downloadLoading = true
-      import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['timestamp', 'title', 'type', 'importance', 'status']
-        const filterVal = ['timestamp', 'title', 'type', 'importance', 'status']
-        const data = this.formatJson(filterVal, this.list)
-        excel.export_json_to_excel({
-          header: tHeader,
-          data,
-          filename: 'table-list'
+    createData() {
+      this.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          createAdministrators(this.temp).then((response) => {
+            this.list.unshift(response)
+            this.dialogFormVisible = false
+            this.$notify({
+              title: '成功',
+              message: '添加成功',
+              type: 'success',
+              duration: 2000
+            })
+          }).catch((error) => {
+            this.$notify({
+              title: '失败',
+              message: error.request.response,
+              type: 'error',
+              duration: 2000
+            })
+          })
+        }
+      })
+    },
+    handleUpdate(row) {
+      this.temp = Object.assign({}, row) // copy obj
+      this.dialogStatus = 'update'
+      this.dialogFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataForm'].clearValidate()
+      })
+    },
+    updateData() {
+      this.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          const tempData = Object.assign({}, this.temp)
+          updateAdministrators(tempData, tempData._id).then(() => {
+            for (const v of this.list) {
+              if (v._id === this.temp._id) {
+                const index = this.list.indexOf(v)
+                this.list.splice(index, 1, this.temp)
+                break
+              }
+            }
+            this.dialogFormVisible = false
+            this.$notify({
+              title: '成功',
+              message: '修改成功',
+              type: 'success',
+              duration: 2000
+            })
+          })
+        }
+      })
+    },
+    handleDelete(row) {
+      this.$confirm('This will permanently delete the file. Do you want to continue?', 'prompt', {
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
+        type: 'warning'
+      }).then(() => {
+        deleteAdministrators(row._id).then(response => {
+          this.$notify({
+            title: '成功',
+            message: '删除成功',
+            type: 'success',
+            duration: 2000
+          })
+          const index = this.list.indexOf(row)
+          this.list.splice(index, 1)
         })
-        this.downloadLoading = false
+      }).catch(() => {
+        this.$notify({
+          title: 'info',
+          message: '已取消删除',
+          type: 'info',
+          duration: 2000
+        })
       })
     }
   }
@@ -153,6 +257,11 @@ export default {
 </script>
 
 <style scoped>
+.avatar{
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+}
 .edit-input {
   padding-right: 100px;
 }

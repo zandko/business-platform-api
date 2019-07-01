@@ -82,6 +82,15 @@
   table-layout: inherit !important;
 }
 
+.el-table .cell {
+  padding-left: 5px !important;
+  padding-right: 5px !important;
+}
+
+.cell .el-tag {
+  margin: 2px;
+}
+
 .demo-table-expand {
   font-size: 0;
 }

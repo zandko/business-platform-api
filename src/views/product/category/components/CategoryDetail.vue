@@ -153,7 +153,7 @@ export default {
       this.status = 'published'
       this.loading = false
       this.$router.push({
-        name: 'ProdyctCategory'
+        name: 'ProdyctCategoryList'
       })
     },
     createProductCategory() {

@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import CategoryDetail from './components/CategoryDetail'
+import CategoryDetail from '../components/CategoryDetail'
 
 export default {
   name: 'ProdyctCategoryCreate',

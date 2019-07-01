@@ -830,7 +830,7 @@ export default {
         data: fmData
       }).then(resData => {
         that.loading = 2
-        that.$emit('crop-upload-success', resData.data)
+        that.$emit('crop-upload-success', resData)
       }).catch(err => {
         if (that.value) {
           that.loading = 3
