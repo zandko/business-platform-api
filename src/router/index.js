@@ -7,7 +7,7 @@ Vue.use(Router)
 import Layout from '@/layout'
 
 /* Router Modules */
-import componentsRouter from './modules/components'
+// import componentsRouter from './modules/components'
 import systemRouter from './modules/system'
 import productRouter from './modules/product'
 
@@ -97,7 +97,7 @@ export const asyncRoutes = [
         path: 'index',
         component: () => import('@/views/carousel/index'),
         name: 'Carousel',
-        meta: { title: '轮播图管理', icon: 'example'}
+        meta: { title: '轮播图管理', icon: 'example' }
       }
     ]
   },
@@ -124,7 +124,7 @@ export const asyncRoutes = [
         component: () => import('@/views/example/article/index'),
         redirect: 'noRedirect',
         name: 'Article',
-        meta: { title: '文章管理'},
+        meta: { title: '文章管理' },
         children: [
           {
             path: 'create',
