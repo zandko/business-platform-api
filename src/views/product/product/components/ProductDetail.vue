@@ -154,9 +154,7 @@
             <div>
               <VueGallery :images="image_url" :index="index" @close="index = null" />
               <div v-for="(image, imageIndex) in image_url" :key="imageIndex" class="image" :style="{ backgroundImage: 'url(' + image + ')', width: '300px', height: '200px' }" @click="index = imageIndex">
-                <el-select v-model="postForm.keywords" class="select-color" placeholder="请选择关联颜色">
-                  <el-option v-for="item in ColorListCheckbox" :key="item._id" :label="item.name" :value="item._id" />
-                </el-select>
+                <el-button type="danger" class="image-delete" icon="el-icon-delete" circle @click.prevent="handleRemoveImage(image, imageIndex)" />
               </div>
             </div>
             <el-upload
@@ -167,7 +165,6 @@
               class="upload-demo"
               :headers="headers"
               :on-success="handleSuccess"
-              :on-remove="handleRemove"
             >
               <i ref="upload" class="el-icon-upload" />
               <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
@@ -215,7 +212,8 @@ const defaultForm = {
   is_best: 0,
   is_new: 0,
   is_rec: 0,
-  onsale_at: undefined
+  onsale_at: undefined,
+  image_color: []
 }
 
 export default {
@@ -296,13 +294,8 @@ export default {
       })
       this.image_url = [...new Set(this.image_url)]
     },
-    handleRemove(file, fileList) {
-      fileList.forEach(element => {
-        if (element.status === 'success') {
-          this.image_url.push(element.url)
-        }
-      })
-      this.image_url = [...new Set(this.image_url)]
+    handleRemoveImage(image, index) {
+      this.image_url.splice(index, 1)
     },
     handleProductTypeChange(val) {
       this.getRemoteTypeAttribute(val)
@@ -442,6 +435,12 @@ export default {
     transform: translateX(-50%);
   }
 }
+.image-delete {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+}
+
 .createPost-container {
   position: relative;
 

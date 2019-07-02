@@ -77,6 +77,13 @@ const productRouter = {
       meta: { title: '产品管理' },
       children: [
         {
+          path: 'set_picture/:id',
+          component: () => import('@/views/product/product/set_picture/index'),
+          name: 'SetPicture',
+          meta: { title: '图片关联' },
+          hidden: true
+        },
+        {
           path: 'list',
           component: () => import('@/views/product/product/list/index'),
           name: 'ProductList',

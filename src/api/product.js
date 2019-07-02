@@ -176,3 +176,26 @@ export function deleteProduct(id) {
     method: 'delete'
   })
 }
+
+export function createProductPicture(data) {
+  return request({
+    url: 'v1/admin/product_picture',
+    method: 'post',
+    data
+  })
+}
+
+export function updateProductPicture(data, id) {
+  return request({
+    url: `v1/admin/product_picture/${id}`,
+    method: 'put',
+    data
+  })
+}
+
+export function deleteProductPicture(id) {
+  return request({
+    url: `v1/admin/product_picture/${id}`,
+    method: 'delete'
+  })
+}

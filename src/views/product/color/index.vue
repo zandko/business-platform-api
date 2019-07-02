@@ -107,7 +107,7 @@ export default {
     },
     getList() {
       this.listLoading = true
-      getProductColor(this.listQuery).then(response => {
+      getProductColor().then(response => {
         this.list = response
         this.listLoading = false
       })

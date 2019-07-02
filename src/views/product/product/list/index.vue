@@ -52,6 +52,9 @@
             <el-form-item label="产品SN：">
               <span>{{ props.row.sn }}</span>
             </el-form-item>
+            <el-form-item label="加入推荐：">
+              <span>{{ props.row.is_new ? ' 新品 /' : '' }}{{ props.row.is_rec ? ' 推荐 /' : '' }}{{ props.row.is_best ? ' 精品' : '' }}</span>
+            </el-form-item>
           </el-form>
         </template>
       </el-table-column>
@@ -86,9 +89,9 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="加入推荐">
-        <template slot-scope="scope">
-          <span>{{ scope.row.is_new ? ' 新品 /' : '' }}{{ scope.row.is_rec ? ' 推荐 /' : '' }}{{ scope.row.is_best ? ' 精品' : '' }}</span>
+      <el-table-column align="center" label="图片关联">
+        <template slot-scope="{row}">
+          <router-link style="color: rgb(64, 158, 255);" :to="'/shop/product/set_picture/'+row._id">图片关联颜色</router-link>
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作">
