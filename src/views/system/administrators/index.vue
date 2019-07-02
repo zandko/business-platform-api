@@ -185,6 +185,7 @@ export default {
               type: 'success',
               duration: 2000
             })
+            this.getList()
           }).catch((error) => {
             this.$notify({
               title: '失败',
@@ -242,6 +243,7 @@ export default {
           })
           const index = this.list.indexOf(row)
           this.list.splice(index, 1)
+          this.getList()
         })
       }).catch(() => {
         this.$notify({

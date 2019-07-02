@@ -36,7 +36,7 @@ const productRouter = {
           path: 'edit/:id',
           component: () => import('@/views/product/category/edit/index'),
           name: 'ProdyctCategoryEdit',
-          meta: { title: '修改分类' },
+          meta: { title: '修改分类', noCache: true, activeMenu: '/shop/category/list' },
           hidden: true
         }
       ]
@@ -93,7 +93,7 @@ const productRouter = {
           path: 'edit/:id',
           component: () => import('@/views/product/product/edit/index'),
           name: 'ProductEdit',
-          meta: { title: '修改产品' },
+          meta: { title: '修改产品', noCache: true, activeMenu: '/shop/product/list' },
           hidden: true
         }
       ]

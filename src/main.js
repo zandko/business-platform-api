@@ -6,6 +6,8 @@ import 'normalize.css/normalize.css' // a modern alternative to CSS resets
 
 import Element from 'element-ui'
 import './styles/element-variables.scss'
+import 'viewerjs/dist/viewer.css'
+import Viewer from 'v-viewer'
 
 import '@/styles/index.scss' // global css
 
@@ -36,6 +38,7 @@ Vue.use(Element, {
   size: Cookies.get('size') || 'medium' // set element-ui default size
 })
 
+Vue.use(Viewer)
 // register global utility filters
 Object.keys(filters).forEach(key => {
   Vue.filter(key, filters[key])

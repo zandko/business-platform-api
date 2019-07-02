@@ -1,45 +1,70 @@
 import request from '@/utils/request'
 
-export function fetchList(query) {
+// 分类管理
+export function getArticleCategories() {
   return request({
-    url: '/article/list',
-    baseURL: process.env.VUE_APP_BASE_API,
-    method: 'get',
-    params: query
+    url: '/v1/admin/article_categories',
+    method: 'get'
   })
 }
 
-export function fetchArticle(id) {
+export function deleteArticleCategories(id) {
   return request({
-    url: '/article/detail',
-    baseURL: process.env.VUE_APP_BASE_API,
-    method: 'get',
-    params: { id }
+    url: `/v1/admin/article_categories/${id}`,
+    method: 'delete'
   })
 }
 
-export function fetchPv(pv) {
+export function updateArticleCategories(data, id) {
   return request({
-    url: '/article/pv',
-    baseURL: process.env.VUE_APP_BASE_API,
-    method: 'get',
-    params: { pv }
+    url: `/v1/admin/article_categories/${id}`,
+    method: 'put',
+    data
   })
 }
 
-export function createArticle(data) {
+export function createArticleCategories(data) {
   return request({
-    url: '/article/create',
-    baseURL: process.env.VUE_APP_BASE_API,
+    url: '/v1/admin/article_categories',
     method: 'post',
     data
   })
 }
 
-export function updateArticle(data) {
+// 文章管理
+export function getArticle(options) {
   return request({
-    url: '/article/update',
-    baseURL: process.env.VUE_APP_BASE_API,
+    url: '/v1/admin/articles',
+    method: 'get',
+    params: options
+  })
+}
+
+export function fetchArticle(id) {
+  return request({
+    url: `/v1/admin/articles/${id}`,
+    method: 'get'
+  })
+}
+
+export function deleteArticle(id) {
+  return request({
+    url: `/v1/admin/articles/${id}`,
+    method: 'delete'
+  })
+}
+
+export function updateArticle(data, id) {
+  return request({
+    url: `/v1/admin/articles/${id}`,
+    method: 'put',
+    data
+  })
+}
+
+export function createArticle(data) {
+  return request({
+    url: '/v1/admin/articles',
     method: 'post',
     data
   })

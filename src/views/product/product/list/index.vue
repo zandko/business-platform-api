@@ -57,7 +57,12 @@
       </el-table-column>
       <el-table-column align="center" label="封面图">
         <template slot-scope="scope">
-          <img width="50" :src="scope.row.image" alt="">
+          <div v-viewer class="images">
+            <img width="50" :src="scope.row.image">
+          </div>
+          <viewer v-show="false">
+            <img :src="scope.row.image">
+          </viewer>
         </template>
       </el-table-column>
       <el-table-column align="center" label="产品标题" prop="title" />
@@ -159,6 +164,7 @@ export default {
           })
           const index = this.list.indexOf(row)
           this.list.splice(index, 1)
+          this.getList()
         })
       }).catch(() => {
         this.$notify({

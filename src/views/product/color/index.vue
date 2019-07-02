@@ -33,15 +33,24 @@
       </el-table-column>
     </el-table>
 
-    <!-- <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" /> -->
-
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
         <el-form-item label="颜色名" prop="name">
           <el-input v-model="temp.name" />
         </el-form-item>
         <el-form-item label="颜色值" prop="value">
-          <el-input v-model="temp.value" />
+          <el-row>
+            <el-col :span="22"><el-input v-model="temp.value" /></el-col>
+            <el-col :span="2">
+              <el-color-picker
+                v-model="color"
+                :predefine="['#409EFF', '#1890ff', '#304156','#212121','#11a983', '#13c2c2', '#6959CD', '#f5222d', ]"
+                class="theme-picker"
+                popper-class="theme-picker-dropdown"
+                @change="handleChangeColor"
+              />
+            </el-col>
+          </el-row>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -58,23 +67,15 @@
 
 <script>
 import { getProductColor, deleteProductColor, createProductColor, updateProductColor } from '@/api/product'
-import waves from '@/directive/waves'
-// import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
 export default {
   name: 'ProductColor',
-  // components: { Pagination },
-  directives: { waves },
   data() {
     return {
       tableKey: 0,
       list: null,
-      total: 0,
       listLoading: true,
-      listQuery: {
-        page: 1,
-        per_page: 20
-      },
+      color: '#409EFF',
       temp: {
         id: undefined,
         name: '',
@@ -98,6 +99,9 @@ export default {
     this.getList()
   },
   methods: {
+    handleChangeColor(val) {
+      this.temp.value = val
+    },
     tableRowClassName({ row, rowIndex }) {
       return 'background-color:' + row.value
     },
@@ -105,7 +109,6 @@ export default {
       this.listLoading = true
       getProductColor(this.listQuery).then(response => {
         this.list = response
-        // this.total = response.data.total
         this.listLoading = false
       })
     },
@@ -124,6 +127,7 @@ export default {
           })
           const index = this.list.indexOf(row)
           this.list.splice(index, 1)
+          this.getList()
         })
       }).catch(() => {
         this.$notify({
@@ -162,6 +166,7 @@ export default {
               type: 'success',
               duration: 2000
             })
+            this.getList()
           })
         }
       })
@@ -202,6 +207,20 @@ export default {
 </script>
 
 <style scoped>
+.theme-message,
+.theme-picker-dropdown {
+  z-index: 99999 !important;
+}
+
+.theme-picker .el-color-picker__trigger {
+  height: 26px !important;
+  width: 26px !important;
+  padding: 2px;
+}
+
+.theme-picker-dropdown .el-color-dropdown__link-btn {
+  display: none;
+}
 .edit-input {
   padding-right: 100px;
 }

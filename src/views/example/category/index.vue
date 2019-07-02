@@ -6,31 +6,14 @@
       </el-button>
     </div>
     <el-table :key="tableKey" v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%">
-      <el-table-column align="center" label="类型ID">
+      <el-table-column align="center" label="分类ID">
         <template slot-scope="scope">
           <span>{{ scope.row._id }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="类型名称">
+      <el-table-column align="center" label="分类名称">
         <template slot-scope="scope">
-          <span>{{ scope.row.title }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="类型简介">
-        <template slot-scope="scope">
-          <span>{{ scope.row.description }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="创建时间">
-        <template slot-scope="scope">
-          <span>{{ scope.row.created_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="类型属性">
-        <template slot-scope="scope">
-          <router-link :to="'/shop/type/attribute/'+scope.row._id" style="color: #409eff">
-            查看属性
-          </router-link>
+          <span>{{ scope.row.cat_name }}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作">
@@ -47,11 +30,8 @@
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="类型名称" prop="title">
-          <el-input v-model="temp.title" />
-        </el-form-item>
-        <el-form-item label="类型简介" prop="description">
-          <el-input v-model="temp.description" type="textarea" />
+        <el-form-item label="分类名称" prop="cat_name">
+          <el-input v-model="temp.cat_name" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -67,10 +47,12 @@
 </template>
 
 <script>
-import { getProductType, deleteProductType, createProductType, updateProductType } from '@/api/product'
+import { getArticleCategories, deleteArticleCategories, updateArticleCategories, createArticleCategories } from '@/api/article'
+import waves from '@/directive/waves'
 
 export default {
-  name: 'ProductType',
+  name: 'ArticleCategory',
+  directives: { waves },
   data() {
     return {
       tableKey: 0,
@@ -78,9 +60,7 @@ export default {
       listLoading: true,
       temp: {
         id: undefined,
-        title: '',
-        description: '',
-        status: 1
+        cat_name: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -90,7 +70,7 @@ export default {
       },
       dialogPvVisible: false,
       rules: {
-        title: [{ required: true, message: 'name is required', trigger: 'blur' }]
+        cat_name: [{ required: true, message: '分类名称是必填项', trigger: 'blur' }]
       }
     }
   },
@@ -100,7 +80,7 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      getProductType(this.listQuery).then(response => {
+      getArticleCategories().then(response => {
         this.list = response
         this.listLoading = false
       })
@@ -111,7 +91,7 @@ export default {
         cancelButtonText: 'Cancel',
         type: 'warning'
       }).then(() => {
-        deleteProductType(row._id).then(response => {
+        deleteArticleCategories(row._id).then(response => {
           this.$notify({
             title: '成功',
             message: '删除成功',
@@ -134,9 +114,7 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        title: '',
-        description: '',
-        status: 1
+        cat_name: ''
       }
     },
     handleCreate() {
@@ -150,7 +128,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          createProductType(this.temp).then((response) => {
+          createArticleCategories(this.temp).then((response) => {
             this.list.unshift(response)
             this.dialogFormVisible = false
             this.$notify({
@@ -176,7 +154,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateProductType(tempData, tempData._id).then(() => {
+          updateArticleCategories(tempData, tempData._id).then(() => {
             for (const v of this.list) {
               if (v._id === this.temp._id) {
                 const index = this.list.indexOf(v)
@@ -191,6 +169,7 @@ export default {
               type: 'success',
               duration: 2000
             })
+            this.getList()
           })
         }
       })

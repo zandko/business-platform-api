@@ -74,11 +74,9 @@
 
 <script>
 import { deleteProductTypeAttribute, createProductTypeAttribute, updateProductTypeAttribute, getProductTypeAttribute } from '@/api/product'
-import waves from '@/directive/waves'
 
 export default {
   name: 'ProductTypeAttribute',
-  directives: { waves },
   data() {
     return {
       tableKey: 0,
@@ -149,6 +147,7 @@ export default {
           })
           const index = this.list.indexOf(row)
           this.list.splice(index, 1)
+          this.getList(this.$route.params.id)
         })
       }).catch(() => {
         this.$notify({
@@ -189,6 +188,7 @@ export default {
               type: 'success',
               duration: 2000
             })
+            this.getList(this.$route.params.id)
           })
         }
       })
